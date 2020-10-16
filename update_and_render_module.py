@@ -1,8 +1,8 @@
 from tkinter import *
-from settings import objects
+from settings import objects, stop_execution
 import time
 
-update_interval = 0.05
+update_interval = 0.025
 
 def update():
     for one_object in objects:
@@ -25,6 +25,8 @@ def render():
 
 def update_and_render():
     while(True):
+        if stop_execution:
+            return
         update()
         render()
         time.sleep(update_interval)

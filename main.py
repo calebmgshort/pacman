@@ -3,7 +3,7 @@ import center_tk_window
 from PIL import ImageTk, Image
 import threading
 from update_and_render_module import update_and_render
-from settings import objects, gui
+from settings import objects, gui, stop_execution
 
 # class Pacman:
 #     def __init__(self):
@@ -28,6 +28,7 @@ object_pacman["label"].place(anchor = NW, x=0, y=0)
 objects.append(object_pacman)
 
 thread_update_and_render = threading.Thread(target=update_and_render)
+# TODO: Getting the update to happen quickly is more important than calling a thread
 # TODO: Close the started thread
 # TODO: Make the objects object-oriented
 
@@ -37,5 +38,7 @@ thread_update_and_render = threading.Thread(target=update_and_render)
 # Start threads
 thread_update_and_render.start()
 
-
 gui.mainloop()
+stop_execution = True
+
+thread_update_and_render.join()
