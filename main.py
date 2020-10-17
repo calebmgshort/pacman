@@ -1,44 +1,67 @@
-from tkinter import *
-import center_tk_window
-from PIL import ImageTk, Image
-import threading
-from update_and_render_module import update_and_render
-from settings import objects, gui, stop_execution
+import pygame
+from enum import Enum
 
-# class Pacman:
-#     def __init__(self):
-#         pass
+# Initialize pygame
+pygame.init()
 
-gui.title("Pacman")
-gui.configure(background="black")
-gui.geometry("700x700")
-center_tk_window.center_on_screen(gui)
+# Create the screen
+screen = pygame.display.set_mode((800,600))
+
+# Title
+pygame.display.set_caption("Pacman")
+
+class Direction(Enum):
+    LEFT = 0
+    RIGHT = 1
+    UP = 2
+    DOWN = 3
+
+# Player
+pacman_initial_image = pygame.image.load("resources/pacman.png")
+pacman_image = pygame.transform.scale(pacman_initial_image, (40,40))
+x = 300
+y = 400
+speed = 0.2
+pacman_direction = Direction.RIGHT
+
+def player(x, y):
+    screen.blit(pacman_image, (x,y))
+
+def calculate_velocity():
+    global x, y, speed
+    if pacman_direction == Direction.RIGHT:
+        x += speed
+    elif pacman_direction == Direction.LEFT:
+        x -= speed
+    elif pacman_direction == Direction.UP:
+        y -= speed
+    elif pacman_direction == Direction.DOWN:
+        y += speed
+
+def handle_keystroke(key):
+    global pacman_direction
+    if key == pygame.K_LEFT:
+        pacman_direction = Direction.LEFT
+    elif key == pygame.K_RIGHT:
+        pacman_direction = Direction.RIGHT
+    elif key == pygame.K_UP:
+        pacman_direction = Direction.UP
+    elif key == pygame.K_DOWN:
+        pacman_direction = Direction.DOWN
 
 
-object_pacman = dict()
-object_pacman["coordinates"] = (0,0)
-object_pacman["velocity"] = (50,0)
-
-image_path = "resources/pacman.png"
-inner_img = Image.open(image_path)
-inner_img = inner_img.resize((40,40))
-outer_img = ImageTk.PhotoImage(inner_img)
-object_pacman["label"] = Label(gui, image = outer_img)
-object_pacman["label"].place(anchor = NW, x=0, y=0)
-objects.append(object_pacman)
-
-thread_update_and_render = threading.Thread(target=update_and_render)
-# TODO: Getting the update to happen quickly is more important than calling a thread
-# TODO: Close the started thread
-# TODO: Make the objects object-oriented
-
-# TODO: Add a thread to listen for user input from the keyboard
+# Game loop
+running = True
+while running:
+    screen.fill((0,0,0))
+    calculate_velocity()
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            handle_keystroke(event.key)
 
 
-# Start threads
-thread_update_and_render.start()
 
-gui.mainloop()
-stop_execution = True
-
-thread_update_and_render.join()
+    player(x, y)
+    pygame.display.update()
