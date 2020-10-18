@@ -9,36 +9,31 @@ class Object:
         self.y = y
         self.height = height
 
-    def overlapping_horizontal(self, other):
-        self_left = self.x
-        self_right = self.x + self.width
-        other_left = other.x
-        other_right = other.x + other.width
+    def overlapping_with_orientation(self, other, orientation):
+        self_begin, self_end, other_begin, other_end = 0,0,0,0
+        if orientation == constants.Orientation.HORIZONTAL:
+            self_begin = self.x
+            self_end = self.x + self.width
+            other_begin = other.x
+            other_end = other.x + other.width
+        elif orientation == constants.Orientation.VERTICAL:
+            self_begin = self.y
+            self_end = self.y + self.height
+            other_begin = other.y
+            other_end = other.y + other.height
+        else:
+            raise TypeError("The orientation type is not valid!")
 
         # This's edge is within other's frame
-        if (self_left < other_right and self_left > other_left) or (self_right < other_right and self_right > other_left):
+        if (self_begin < other_end and self_begin > other_begin) or (self_end < other_end and self_end > other_begin):
             return True
         # Other's edge is within this's frame
-        if (other_left < self_right and other_left > self_left) or (other_right < self_right and other_right > self_left):
-            return True
-        return False
-
-    def overlapping_vertical(self, other):
-        self_top = self.y
-        self_bottom = self.y + self.height
-        other_top = other.y
-        other_bottom = other.y + other.height
-
-        # This's edge is within other's frame
-        if (self_top < other_bottom and self_top > other_top) or (self_bottom < other_bottom and self_bottom > other_top):
-            return True
-        # Other's edge is within this's frame
-        if (other_top < self_bottom and other_top > self_top) or (other_bottom < self_bottom and other_bottom > self_top):
+        if (other_begin < self_end and other_begin > self_begin) or (other_end < self_end and other_end > self_begin):
             return True
         return False
 
     def overlapping(self, other):
-        return self.overlapping_horizontal(other) and self.overlapping_vertical(other)
+        return self.overlapping_with_orientation(other, constants.Orientation.HORIZONTAL) and self.overlapping_with_orientation(other, constants.Orientation.VERTICAL)
 
 class Wall(Object):
     def __init__(self, screen, left, top, orientation, length):
