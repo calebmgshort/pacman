@@ -1,9 +1,9 @@
 import pygame
 import constants
+import public_vars
 
 class Object:
-    def __init__(self, screen, x, width, y, height):
-        self.screen = screen
+    def __init__(self, x, width, y, height):
         self.x = x
         self.width = width
         self.y = y
@@ -36,7 +36,7 @@ class Object:
         return self.overlapping_with_orientation(other, constants.Orientation.HORIZONTAL) and self.overlapping_with_orientation(other, constants.Orientation.VERTICAL)
 
 class Wall(Object):
-    def __init__(self, screen, left, top, orientation, length):
+    def __init__(self, left, top, orientation, length):
         width = 0
         height = 0
         if orientation == constants.Orientation.HORIZONTAL:
@@ -47,23 +47,23 @@ class Wall(Object):
             height = length
         else:
             raise TypeError("The orientation provided is invalid")
-        super(Wall, self).__init__(screen, left, width, top, height)
+        super(Wall, self).__init__(left, width, top, height)
         self.object = pygame.Rect(left, top, width, height)
 
     def render(self):
-        pygame.draw.rect(self.screen, constants.BLUE, self.object)
+        pygame.draw.rect(public_vars.screen, constants.BLUE, self.object)
 
 class Character(Object):
-    def __init__(self, screen, x, y, direction, image_path):
-        super(Character, self).__init__(screen, x, constants.CHARACTER_SIZE, y, constants.CHARACTER_SIZE)
+    def __init__(self, x, y, direction, image_path):
+        super(Character, self).__init__(x, constants.CHARACTER_SIZE, y, constants.CHARACTER_SIZE)
         initial_image = pygame.image.load(image_path)
         self.image = pygame.transform.scale(initial_image, (constants.CHARACTER_SIZE,constants.CHARACTER_SIZE))
         self.direction = direction
 
     def render(self):
-        self.screen.blit(self.image, (self.x, self.y))
+        public_vars.screen.blit(self.image, (self.x, self.y))
     
-    def move(self, wall):
+    def move(self, walls):
         old_x = self.x
         old_y = self.y
         if self.direction == constants.Direction.RIGHT:
@@ -84,6 +84,7 @@ class Character(Object):
         if self.y > constants.SCREEN_HEIGHT - constants.CHARACTER_SIZE:
             self.y = constants.SCREEN_HEIGHT - constants.CHARACTER_SIZE
         # Handle the case where we've run into a wall
-        if self.overlapping(wall):
-            self.x = old_x
-            self.y = old_y
+        for wall in walls:
+            if self.overlapping(wall):
+                self.x = old_x
+                self.y = old_y

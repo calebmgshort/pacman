@@ -1,21 +1,23 @@
 import pygame
 import constants
+import public_vars
 import objects
+import init
 
 # Initialize pygame
 pygame.init()
 
 # Create the screen
-screen = pygame.display.set_mode((constants.SCREEN_WIDTH,constants.SCREEN_HEIGHT))
+public_vars.screen = pygame.display.set_mode((constants.SCREEN_WIDTH,constants.SCREEN_HEIGHT))
 
 # Title
 pygame.display.set_caption("Pacman")
 
 # Pacman
-pacman = objects.Character(screen, 300, 400, constants.Direction.RIGHT, "resources/pacman.png")
+pacman = objects.Character(0, 0, constants.Direction.RIGHT, "resources/pacman.png")
 
 # Walls
-wall = objects.Wall(screen, 500, 300, constants.Orientation.VERTICAL, 200)
+walls = init.create_map()
 
 def handle_keystroke(key):
     global pacman
@@ -32,8 +34,8 @@ def handle_keystroke(key):
 # Game loop
 running = True
 while running:
-    screen.fill(constants.BLACK)
-    pacman.move(wall)
+    public_vars.screen.fill(constants.BLACK)
+    pacman.move(walls)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -43,5 +45,6 @@ while running:
 
 
     pacman.render()
-    wall.render()
+    for wall in walls:
+        wall.render()
     pygame.display.update()
