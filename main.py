@@ -14,7 +14,7 @@ public_vars.screen = pygame.display.set_mode((constants.SCREEN_WIDTH,constants.S
 pygame.display.set_caption("Pacman")
 
 # Pacman
-pacman = objects.Character(0, 0, constants.Direction.RIGHT, "resources/pacman.png")
+pacman = objects.Character(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.WALL_LATITUDE_8+constants.MEDIUM_WALL_THICKNESS, constants.Direction.LEFT, "resources/pacman.png")
 
 # Walls
 walls = init.create_map()

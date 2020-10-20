@@ -77,15 +77,11 @@ class Character(Object):
             self.y += constants.CHARACTER_SPEED
         else:
             raise TypeError("The direction is not a valid type")
-        # Handle the case where we've reached the edge of the screen
-        if self.x < 0:
-            self.x = 0
-        if self.x > constants.SCREEN_WIDTH - constants.CHARACTER_SIZE:
-            self.x = constants.SCREEN_WIDTH - constants.CHARACTER_SIZE
-        if self.y < 0:
-            self.y = 0
-        if self.y > constants.SCREEN_HEIGHT - constants.CHARACTER_SIZE:
-            self.y = constants.SCREEN_HEIGHT - constants.CHARACTER_SIZE
+        # Handle the case where we've reached the edge of the map
+        if self.x < constants.WALL_LONGITUDE_1:
+            self.x = constants.WALL_LONGITUDE_9 + constants.THIN_WALL_THICKNESS - constants.CHARACTER_SIZE
+        if self.x > constants.WALL_LONGITUDE_9 + constants.THIN_WALL_THICKNESS - constants.CHARACTER_SIZE:
+            self.x = constants.WALL_LONGITUDE_1
         # Handle the case where we've run into a wall
         for wall in walls:
             if self.overlapping(wall):
