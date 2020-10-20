@@ -22,13 +22,13 @@ walls = init.create_map()
 def handle_keystroke(key):
     global pacman
     if key == pygame.K_LEFT:
-        pacman.direction = constants.Direction.LEFT
+        pacman.desired_direction = constants.Direction.LEFT
     elif key == pygame.K_RIGHT:
-        pacman.direction = constants.Direction.RIGHT
+        pacman.desired_direction = constants.Direction.RIGHT
     elif key == pygame.K_UP:
-        pacman.direction = constants.Direction.UP
+        pacman.desired_direction = constants.Direction.UP
     elif key == pygame.K_DOWN:
-        pacman.direction = constants.Direction.DOWN
+        pacman.desired_direction = constants.Direction.DOWN
 
 
 # Game loop
@@ -41,9 +41,6 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN:
             handle_keystroke(event.key)
-
-
-
     pacman.render()
     for wall in walls:
         wall.render()

@@ -36,14 +36,14 @@ class Object:
         return self.overlapping_with_orientation(other, constants.Orientation.HORIZONTAL) and self.overlapping_with_orientation(other, constants.Orientation.VERTICAL)
 
 class Wall(Object):
-    def __init__(self, left, top, orientation, length):
+    def __init__(self, left, top, orientation, thickness, length):
         width = 0
         height = 0
         if orientation == constants.Orientation.HORIZONTAL:
             width = length
-            height = constants.WALL_THICKNESS
+            height = thickness
         elif orientation == constants.Orientation.VERTICAL:
-            width = constants.WALL_THICKNESS
+            width = thickness
             height = length
         else:
             raise TypeError("The orientation provided is invalid")
@@ -59,6 +59,7 @@ class Character(Object):
         initial_image = pygame.image.load(image_path)
         self.image = pygame.transform.scale(initial_image, (constants.CHARACTER_SIZE,constants.CHARACTER_SIZE))
         self.direction = direction
+        self.desired_direction = direction
 
     def render(self):
         public_vars.screen.blit(self.image, (self.x, self.y))
@@ -74,6 +75,8 @@ class Character(Object):
             self.y -= constants.CHARACTER_SPEED
         elif self.direction == constants.Direction.DOWN:
             self.y += constants.CHARACTER_SPEED
+        else:
+            raise TypeError("The direction is not a valid type")
         # Handle the case where we've reached the edge of the screen
         if self.x < 0:
             self.x = 0
@@ -88,3 +91,28 @@ class Character(Object):
             if self.overlapping(wall):
                 self.x = old_x
                 self.y = old_y
+                break
+        
+        # Change the direction to be the desired direction if the desired direction is a valid option
+        desired_direction_valid = True
+        stored_x = self.x
+        stored_y = self.y
+        attempted_displacement = (constants.LANE_SIZE - constants.CHARACTER_SIZE) * 2 
+        if self.desired_direction == constants.Direction.RIGHT:
+            self.x += attempted_displacement
+        elif self.desired_direction == constants.Direction.LEFT:
+            self.x -= attempted_displacement
+        elif self.desired_direction == constants.Direction.UP:
+            self.y -= attempted_displacement
+        elif self.desired_direction == constants.Direction.DOWN:
+            self.y += attempted_displacement
+        else:
+            raise TypeError("The direction is not a valid type")
+        for wall in walls:
+            if self.overlapping(wall):
+                desired_direction_valid = False
+                break
+        if desired_direction_valid:
+            self.direction = self.desired_direction
+        self.x = stored_x
+        self.y = stored_y
