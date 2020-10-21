@@ -84,7 +84,24 @@ def generate_walls():
     walls.append(Wall(WALL_LONGITUDE_9, WALL_LATITUDE_7_OUTSIDE, Orientation.VERTICAL, THIN_WALL_THICKNESS, WALL_VERTICAL_LENGTH_2))
     return walls
 
+def add_point(points, x, y):
+    point = Point(x, y)
+    overlapping = False
+    for wall in public_vars.walls:
+        if point.overlapping(wall):
+            overlapping = True
+            break
+    if not overlapping:
+        points.append(point)
+
 def create_points():
     points = []
-    points.append(Point(SCREEN_WIDTH/2, LANE_SIZE/2))
+    for y in range(LANE_HORIZONTAL_1_LATTITUDE, LANE_HORIZONTAL_10_LATTITUDE+1, LANE_SIZE//2):
+        if y > LANE_HORIZONTAL_3_LATTITUDE and y < LANE_HORIZONTAL_7_LATTITUDE:
+            continue
+        for x in range(LANE_VERTICAL_1_LONGITUDE, LANE_VERTICAL_10_LONGITUDE+1, LANE_SIZE//2):
+            add_point(points, x, y)
+    for y in range(LANE_HORIZONTAL_3_LATTITUDE+LANE_SIZE//2, LANE_HORIZONTAL_7_LATTITUDE-1, LANE_SIZE//2):
+        add_point(points, LANE_VERTICAL_3_LONGITUDE, y)
+        add_point(points, LANE_VERTICAL_8_LONGITUDE, y)
     return points

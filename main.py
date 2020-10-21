@@ -18,11 +18,10 @@ pygame.display.set_caption("Pacman")
 
 
 # Pacman
-#pacman = objects.Character(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.WALL_LATITUDE_8+constants.MEDIUM_WALL_THICKNESS, constants.Direction.LEFT, "resources/pacman.png")
-pacman = objects.Character(constants.CHARACTER_SIZE, 0, constants.Direction.RIGHT, "resources/pacman.png")
+pacman = objects.Character(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.WALL_LATITUDE_8+constants.MEDIUM_WALL_THICKNESS, constants.Direction.LEFT, "resources/pacman.png")
 
 # Walls
-walls = init.generate_walls()
+public_vars.walls = init.generate_walls()
 
 # Points
 points = init.create_points()
@@ -46,14 +45,14 @@ def handle_keystroke(key):
 running = True
 while running:
     public_vars.screen.fill(constants.BLACK)
-    pacman.move(walls, points)
+    pacman.move(public_vars.walls, points)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
             handle_keystroke(event.key)
     pacman.render()
-    for wall in walls:
+    for wall in public_vars.walls:
         wall.render()
     for point in points:
         point.render()
