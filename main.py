@@ -7,8 +7,8 @@ import init
 # Initialize pygame
 pygame.init()
 # Initialize text
-# pygame.font.init()
-# myfont = pygame.font.SysFont('Comic Sans MS', 30)
+pygame.font.init()
+font = pygame.font.Font('freesansbold.ttf', 30)
 
 # Create the screen
 public_vars.screen = pygame.display.set_mode((constants.SCREEN_WIDTH,constants.SCREEN_HEIGHT))
@@ -57,6 +57,6 @@ while running:
         wall.render()
     for point in points:
         point.render()
-    #textsurface = myfont.render('Score: {}'.format(public_vars.score), True, constants.WHITE)
-    #public_vars.screen.blit(textsurface, (constants.SCREEN_WIDTH/2,0))
+    textsurface = font.render('Score: {}'.format(public_vars.score), True, constants.WHITE)
+    public_vars.screen.blit(textsurface, (constants.SCREEN_WIDTH/2,0))
     pygame.display.update()

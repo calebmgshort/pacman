@@ -11,7 +11,6 @@ class Orientation(Enum):
     HORIZONTAL = 0
     VERTICAL = 1
 
-#class Color(Enum):
 BLACK = (0,0,0)
 BLUE = (0,0,255)
 LIGHT_PINK = (255,204,229)
