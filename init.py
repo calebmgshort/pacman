@@ -1,9 +1,9 @@
 import pygame
 from constants import *
 import public_vars
-from objects import Wall
+from objects import Wall, Point
 
-def create_map():
+def generate_walls():
     walls = []
     # Wall(x, y, orientation, thickness, length)
     # Horizontal Walls
@@ -83,3 +83,8 @@ def create_map():
     walls.append(Wall(WALL_LONGITUDE_9, WALL_LATITUDE_1, Orientation.VERTICAL, THIN_WALL_THICKNESS, WALL_VERTICAL_LENGTH_1))
     walls.append(Wall(WALL_LONGITUDE_9, WALL_LATITUDE_7_OUTSIDE, Orientation.VERTICAL, THIN_WALL_THICKNESS, WALL_VERTICAL_LENGTH_2))
     return walls
+
+def create_points():
+    points = []
+    points.append(Point(SCREEN_WIDTH/2, LANE_SIZE/2))
+    return points

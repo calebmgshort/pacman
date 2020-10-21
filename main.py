@@ -6,6 +6,9 @@ import init
 
 # Initialize pygame
 pygame.init()
+# Initialize text
+# pygame.font.init()
+# myfont = pygame.font.SysFont('Comic Sans MS', 30)
 
 # Create the screen
 public_vars.screen = pygame.display.set_mode((constants.SCREEN_WIDTH,constants.SCREEN_HEIGHT))
@@ -13,11 +16,19 @@ public_vars.screen = pygame.display.set_mode((constants.SCREEN_WIDTH,constants.S
 # Title
 pygame.display.set_caption("Pacman")
 
+
 # Pacman
-pacman = objects.Character(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.WALL_LATITUDE_8+constants.MEDIUM_WALL_THICKNESS, constants.Direction.LEFT, "resources/pacman.png")
+#pacman = objects.Character(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.WALL_LATITUDE_8+constants.MEDIUM_WALL_THICKNESS, constants.Direction.LEFT, "resources/pacman.png")
+pacman = objects.Character(constants.CHARACTER_SIZE, 0, constants.Direction.RIGHT, "resources/pacman.png")
 
 # Walls
-walls = init.create_map()
+walls = init.generate_walls()
+
+# Points
+points = init.create_points()
+
+# Score 
+public_vars.score = 0
 
 def handle_keystroke(key):
     global pacman
@@ -35,7 +46,7 @@ def handle_keystroke(key):
 running = True
 while running:
     public_vars.screen.fill(constants.BLACK)
-    pacman.move(walls)
+    pacman.move(walls, points)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -44,4 +55,8 @@ while running:
     pacman.render()
     for wall in walls:
         wall.render()
+    for point in points:
+        point.render()
+    #textsurface = myfont.render('Score: {}'.format(public_vars.score), True, constants.WHITE)
+    #public_vars.screen.blit(textsurface, (constants.SCREEN_WIDTH/2,0))
     pygame.display.update()

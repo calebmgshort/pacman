@@ -11,6 +11,12 @@ class Orientation(Enum):
     HORIZONTAL = 0
     VERTICAL = 1
 
+#class Color(Enum):
+BLACK = (0,0,0)
+BLUE = (0,0,255)
+LIGHT_PINK = (255,204,229)
+WHITE = (255,255,255)
+
 # Default settings
 CHARACTER_SPEED = 0.2
 THIN_WALL_THICKNESS = 10
@@ -18,10 +24,6 @@ MEDIUM_WALL_THICKNESS = 2 * THIN_WALL_THICKNESS
 THICK_WALL_THICKNESS = 4 * THIN_WALL_THICKNESS
 LANE_SIZE = 4 * THIN_WALL_THICKNESS
 CHARACTER_SIZE = LANE_SIZE - LANE_SIZE//10
-
-# Colors
-BLACK = (0,0,0)
-BLUE = (0,0,255)
 
 # Board Settings
 # screen height = 10 lanes + 4 thin walls + 6 medium walls + 1 thick wall, + 4 outside lanes
