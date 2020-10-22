@@ -94,7 +94,7 @@ def add_point(points, x, y):
     if not overlapping:
         points.append(point)
 
-def create_points():
+def generate_points():
     points = []
     for y in range(LANE_HORIZONTAL_1_LATTITUDE, LANE_HORIZONTAL_10_LATTITUDE+1, LANE_SIZE//2):
         if y > LANE_HORIZONTAL_3_LATTITUDE and y < LANE_HORIZONTAL_7_LATTITUDE:

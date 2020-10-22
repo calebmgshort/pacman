@@ -9,7 +9,7 @@ class Object:
         self.y = y
         self.height = height
 
-    def overlapping_with_orientation(self, other, orientation):
+    def __overlapping_with_orientation(self, other, orientation):
         self_begin, self_end, other_begin, other_end = 0,0,0,0
         if orientation == constants.Orientation.HORIZONTAL:
             self_begin = self.x
@@ -33,7 +33,7 @@ class Object:
         return False
 
     def overlapping(self, other):
-        return self.overlapping_with_orientation(other, constants.Orientation.HORIZONTAL) and self.overlapping_with_orientation(other, constants.Orientation.VERTICAL)
+        return self.__overlapping_with_orientation(other, constants.Orientation.HORIZONTAL) and self.__overlapping_with_orientation(other, constants.Orientation.VERTICAL)
 
 class Wall(Object):
     def __init__(self, left, top, orientation, thickness, length):
@@ -79,7 +79,7 @@ class Character(Object):
     def render(self):
         public_vars.screen.blit(self.image, (self.x, self.y))
     
-    def move(self, walls, points):
+    def move(self):
         old_x = self.x
         old_y = self.y
         if self.direction == constants.Direction.RIGHT:
@@ -98,15 +98,15 @@ class Character(Object):
         if self.x > constants.WALL_LONGITUDE_9 + constants.THIN_WALL_THICKNESS - constants.CHARACTER_SIZE:
             self.x = constants.WALL_LONGITUDE_1
         # Handle the case where we've run into a wall
-        for wall in walls:
+        for wall in public_vars.walls:
             if self.overlapping(wall):
                 self.x = old_x
                 self.y = old_y
                 break
-        for point in points:
+        for point in public_vars.points:
             if(self.overlapping(point)):
                 public_vars.score += 10
-                points.remove(point)
+                public_vars.points.remove(point)
 
 
         
@@ -125,7 +125,7 @@ class Character(Object):
             self.y += attempted_displacement
         else:
             raise TypeError("The direction is not a valid type")
-        for wall in walls:
+        for wall in public_vars.walls:
             if self.overlapping(wall):
                 desired_direction_valid = False
                 break

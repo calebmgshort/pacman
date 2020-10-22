@@ -24,7 +24,7 @@ pacman = objects.Character(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2
 public_vars.walls = init.generate_walls()
 
 # Points
-points = init.create_points()
+public_vars.points = init.generate_points()
 
 # Score 
 public_vars.score = 0
@@ -45,7 +45,7 @@ def handle_keystroke(key):
 running = True
 while running:
     public_vars.screen.fill(constants.BLACK)
-    pacman.move(public_vars.walls, points)
+    pacman.move()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -54,7 +54,7 @@ while running:
     pacman.render()
     for wall in public_vars.walls:
         wall.render()
-    for point in points:
+    for point in public_vars.points:
         point.render()
     textsurface = font.render('Score: {}'.format(public_vars.score), True, constants.WHITE)
     public_vars.screen.blit(textsurface, (constants.SCREEN_WIDTH/2,0))
