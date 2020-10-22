@@ -133,3 +133,10 @@ class Character(Object):
             self.direction = self.desired_direction
         self.x = stored_x
         self.y = stored_y
+
+class Ghost(Character):
+    pass
+
+class Pacman(Object):
+    def __init__(self, x, y, direction):
+        pass

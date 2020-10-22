@@ -19,6 +19,11 @@ pygame.display.set_caption("Pacman")
 
 # Pacman
 pacman = objects.Character(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.WALL_LATITUDE_8+constants.MEDIUM_WALL_THICKNESS, constants.Direction.LEFT, "resources/pacman.png")
+red_ghost = objects.Character(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2, constants.Direction.DOWN, "resources/red.png")
+green_ghost = objects.Character(constants.SCREEN_WIDTH//2+constants.CHARACTER_SIZE//2, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2, constants.Direction.RIGHT, "resources/green.png")
+pink_ghost = objects.Character(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2-constants.CHARACTER_SIZE, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2, constants.Direction.LEFT, "resources/pink.png")
+orange_ghost = objects.Character(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2-constants.CHARACTER_SIZE, constants.Direction.UP, "resources/orange.png")
+
 
 # Walls
 public_vars.walls = init.generate_walls()
@@ -52,10 +57,16 @@ while running:
         if event.type == pygame.KEYDOWN:
             handle_keystroke(event.key)
     pacman.render()
+    red_ghost.render()
+    green_ghost.render()
+    pink_ghost.render()
+    orange_ghost.render()
     for wall in public_vars.walls:
         wall.render()
     for point in public_vars.points:
         point.render()
     textsurface = font.render('Score: {}'.format(public_vars.score), True, constants.WHITE)
     public_vars.screen.blit(textsurface, (constants.SCREEN_WIDTH/2,0))
+
+    #pygame.draw.arc(public_vars.screen, )
     pygame.display.update()
