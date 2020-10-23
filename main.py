@@ -18,11 +18,11 @@ pygame.display.set_caption("Pacman")
 
 
 # Pacman
-pacman = objects.Character(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.WALL_LATITUDE_8+constants.MEDIUM_WALL_THICKNESS, constants.Direction.LEFT, "resources/pacman.png")
-red_ghost = objects.Character(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2, constants.Direction.DOWN, "resources/red.png")
-green_ghost = objects.Character(constants.SCREEN_WIDTH//2+constants.CHARACTER_SIZE//2, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2, constants.Direction.RIGHT, "resources/green.png")
-pink_ghost = objects.Character(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2-constants.CHARACTER_SIZE, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2, constants.Direction.LEFT, "resources/pink.png")
-orange_ghost = objects.Character(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2-constants.CHARACTER_SIZE, constants.Direction.UP, "resources/orange.png")
+pacman = objects.Pacman(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.WALL_LATITUDE_8+constants.MEDIUM_WALL_THICKNESS, constants.Direction.LEFT)
+red_ghost = objects.Ghost(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2, constants.Direction.DOWN, "resources/red.png")
+green_ghost = objects.Ghost(constants.SCREEN_WIDTH//2+constants.CHARACTER_SIZE//2, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2, constants.Direction.RIGHT, "resources/green.png")
+pink_ghost = objects.Ghost(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2-constants.CHARACTER_SIZE, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2, constants.Direction.LEFT, "resources/pink.png")
+orange_ghost = objects.Ghost(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2-constants.CHARACTER_SIZE, constants.Direction.UP, "resources/orange.png")
 
 
 # Walls
@@ -51,6 +51,10 @@ running = True
 while running:
     public_vars.screen.fill(constants.BLACK)
     pacman.move()
+    red_ghost.move()
+    green_ghost.move()
+    pink_ghost.move()
+    orange_ghost.render()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -67,6 +71,6 @@ while running:
         point.render()
     textsurface = font.render('Score: {}'.format(public_vars.score), True, constants.WHITE)
     public_vars.screen.blit(textsurface, (constants.SCREEN_WIDTH/2,0))
-
+    #pygame.draw.circle(public_vars.screen, )
     #pygame.draw.arc(public_vars.screen, )
     pygame.display.update()

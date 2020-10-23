@@ -1,6 +1,11 @@
 import pygame
+import pygame.gfxdraw
 import constants
 import public_vars
+import abc
+import math
+from PIL import Image, ImageDraw
+
 
 class Object:
     def __init__(self, x, width, y, height):
@@ -8,6 +13,10 @@ class Object:
         self.width = width
         self.y = y
         self.height = height
+    
+    @abc.abstractmethod
+    def render(self):
+        pass
 
     def __overlapping_with_orientation(self, other, orientation):
         self_begin, self_end, other_begin, other_end = 0,0,0,0
@@ -69,15 +78,12 @@ class Point(Circle):
         super().__init__(center_x, center_y, 4)
 
 class Character(Object):
-    def __init__(self, x, y, direction, image_path):
+    __metaclass__ = abc.ABCMeta
+    
+    def __init__(self, x, y, direction):
         super().__init__(x, constants.CHARACTER_SIZE, y, constants.CHARACTER_SIZE)
-        initial_image = pygame.image.load(image_path)
-        self.image = pygame.transform.scale(initial_image, (constants.CHARACTER_SIZE,constants.CHARACTER_SIZE))
         self.direction = direction
         self.desired_direction = direction
-
-    def render(self):
-        public_vars.screen.blit(self.image, (self.x, self.y))
     
     def move(self):
         old_x = self.x
@@ -103,12 +109,6 @@ class Character(Object):
                 self.x = old_x
                 self.y = old_y
                 break
-        for point in public_vars.points:
-            if(self.overlapping(point)):
-                public_vars.score += 10
-                public_vars.points.remove(point)
-
-
         
         # Change the direction to be the desired direction if the desired direction is a valid option
         desired_direction_valid = True
@@ -135,8 +135,76 @@ class Character(Object):
         self.y = stored_y
 
 class Ghost(Character):
-    pass
+    def __init__(self, x, y, direction, image_path):
+        super().__init__(x, y, direction)
+        initial_image = pygame.image.load(image_path)
+        self.image = pygame.transform.scale(initial_image, (constants.CHARACTER_SIZE,constants.CHARACTER_SIZE))
 
-class Pacman(Object):
+    def render(self):
+        public_vars.screen.blit(self.image, (self.x, self.y))
+
+def draw_pie(x, y, radius, angle, color):
+    # Start list of polygon points
+    p = [(x, y)]
+
+    # Get points on arc
+    for n in range(0,angle):
+        x2 = x + int(radius*math.cos(n*math.pi/180))
+        y2 = y + int(radius*math.sin(n*math.pi/180))
+        p.append((x2, y2))
+    p.append((x, y))
+
+    # Draw pie segment
+    if len(p) > 2:
+        pygame.draw.polygon(public_vars.screen, color, p)
+
+def draw_pie_2(center_x, center_y, radius, startdegree, enddegree, color):
+    for a_radius in range(1, radius+1):
+        pygame.gfxdraw.pie(public_vars.screen, round(center_x), round(center_y), a_radius, -30, 30, color)
+
+def pilImageToSurface(pilImage):
+    return pygame.image.fromstring(
+        pilImage.tobytes(), pilImage.size, pilImage.mode).convert()
+
+class Pacman(Character):
     def __init__(self, x, y, direction):
-        pass
+        super().__init__(x, y, direction)
+
+    def move(self):
+        super().move()
+        for point in public_vars.points:
+            if(self.overlapping(point)):
+                public_vars.score += 10
+                public_vars.points.remove(point)
+    
+    def render(self):
+        radius = constants.CHARACTER_SIZE//2
+        center_x = self.x + radius
+        center_y = self.y + radius
+        pygame.draw.circle(public_vars.screen, constants.YELLOW, (center_x, center_y), radius)
+        # draw the eye
+        # eye_coordinates = (center_x, center_y)
+        # eye_radius = 2
+        # if self.direction == constants.Direction.RIGHT:
+        #     eye_coordinates = (center_x + radius//2, center_y + radius//2)
+        # elif self.direction == constants.Direction.UP:
+        #     eye_coordinates = (center_x - radius//2, center_y + radius//2)
+        # elif self.direction == constants.Direction.DOWN:
+        #     eye_coordinates = (center_x + radius//2, center_y - radius//2)
+        # elif self.direction == constants.Direction.DOWN:
+        
+        w, h = 220, 190
+        shape = [(40, 40), (w - 10, h - 10)] 
+        
+        # creating new Image object 
+        img = Image.new("RGB", (w, h)) 
+        
+        # create pieslice image 
+        img1 = ImageDraw.Draw(img)   
+        img1.pieslice(shape, start = 50, end = 250, fill =constants.WHITE, outline ="red") 
+        pygame_img = pilImageToSurface(img)
+        public_vars.screen.blit(pygame_img, (50,50))
+        #draw_pie_2(round(center_x), round(center_y), radius, -30, 30, constants.BLACK)
+        #pygame.gfxdraw.pie(public_vars.screen, round(center_x), round(center_y), radius, -30, 30, constants.BLACK)
+        #draw_pie(center_x, center_y, radius, 30, constants.BLACK)
+

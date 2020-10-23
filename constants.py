@@ -15,6 +15,7 @@ BLACK = (0,0,0)
 BLUE = (0,0,255)
 LIGHT_PINK = (255,204,229)
 WHITE = (255,255,255)
+YELLOW = (255,255,0)
 
 # Default settings
 CHARACTER_SPEED = 0.2
