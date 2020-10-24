@@ -4,7 +4,7 @@ import constants
 import public_vars
 import abc
 import math
-from PIL import Image, ImageDraw
+import time
 
 
 class Object:
@@ -143,28 +143,38 @@ class Ghost(Character):
     def render(self):
         public_vars.screen.blit(self.image, (self.x, self.y))
 
-def draw_pie(x, y, radius, angle, color):
-    # Start list of polygon points
-    p = [(x, y)]
+def draw_pacman_mouth(center_x, center_y, max_angle, direction):
+    # Calculate current angle.
+    angle = 0
 
-    # Get points on arc
-    for n in range(0,angle):
-        x2 = x + int(radius*math.cos(n*math.pi/180))
-        y2 = y + int(radius*math.sin(n*math.pi/180))
-        p.append((x2, y2))
-    p.append((x, y))
+    current_time = time.time()
+    time_dif = current_time - public_vars.start_time
+    time_dif %= 1
+    if time_dif - 0.5 < 0:
+        angle = max_angle - max_angle*time_dif*2
+    else: 
+        angle = max_angle * (time_dif - 0.5) * 2
+    # print("Time dif: {}, Angle: {}".format(time_dif, angle))
+    angle = int(angle)
+    extra = angle % 5
+    angle -= extra
+    # round to nearest 5
+    # I have angle, adjacent
+    # tan(angle) = opposite / adjacent
+    adjacent = constants.CHARACTER_SIZE//2
+    opposite = math.tan(angle/2) * adjacent
+    if direction == constants.Direction.RIGHT:
+        pygame.draw.polygon(public_vars.screen, constants.BLACK, [(center_x, center_y), (center_x+adjacent, center_y + opposite), (center_x+adjacent, center_y-opposite)])
+    elif direction == constants.Direction.LEFT:
+        pygame.draw.polygon(public_vars.screen, constants.BLACK, [(center_x, center_y), (center_x-adjacent, center_y + opposite), (center_x-adjacent, center_y-opposite)])
+    elif direction == constants.Direction.UP:
+        pygame.draw.polygon(public_vars.screen, constants.BLACK, [(center_x, center_y), (center_x-opposite, center_y-adjacent), (center_x+opposite, center_y-adjacent)])  
+    elif direction == constants.Direction.DOWN:
+        pygame.draw.polygon(public_vars.screen, constants.BLACK, [(center_x, center_y), (center_x-opposite, center_y+adjacent), (center_x+opposite, center_y+adjacent)])   
+    else:
+        raise ValueError("Direction not valid")
 
-    # Draw pie segment
-    if len(p) > 2:
-        pygame.draw.polygon(public_vars.screen, color, p)
 
-def draw_pie_2(center_x, center_y, radius, startdegree, enddegree, color):
-    for a_radius in range(1, radius+1):
-        pygame.gfxdraw.pie(public_vars.screen, round(center_x), round(center_y), a_radius, -30, 30, color)
-
-def pilImageToSurface(pilImage):
-    return pygame.image.fromstring(
-        pilImage.tobytes(), pilImage.size, pilImage.mode).convert()
 
 class Pacman(Character):
     def __init__(self, x, y, direction):
@@ -182,6 +192,7 @@ class Pacman(Character):
         center_x = self.x + radius
         center_y = self.y + radius
         pygame.draw.circle(public_vars.screen, constants.YELLOW, (center_x, center_y), radius)
+        draw_pacman_mouth(center_x, center_y, 30, self.direction)
         # draw the eye
         # eye_coordinates = (center_x, center_y)
         # eye_radius = 2
@@ -193,18 +204,4 @@ class Pacman(Character):
         #     eye_coordinates = (center_x + radius//2, center_y - radius//2)
         # elif self.direction == constants.Direction.DOWN:
         
-        w, h = 220, 190
-        shape = [(40, 40), (w - 10, h - 10)] 
-        
-        # creating new Image object 
-        img = Image.new("RGB", (w, h)) 
-        
-        # create pieslice image 
-        img1 = ImageDraw.Draw(img)   
-        img1.pieslice(shape, start = 50, end = 250, fill =constants.WHITE, outline ="red") 
-        pygame_img = pilImageToSurface(img)
-        public_vars.screen.blit(pygame_img, (50,50))
-        #draw_pie_2(round(center_x), round(center_y), radius, -30, 30, constants.BLACK)
-        #pygame.gfxdraw.pie(public_vars.screen, round(center_x), round(center_y), radius, -30, 30, constants.BLACK)
-        #draw_pie(center_x, center_y, radius, 30, constants.BLACK)
 

@@ -3,6 +3,7 @@ import constants
 import public_vars
 import objects
 import init
+import time
 
 # Initialize pygame
 pygame.init()
@@ -33,6 +34,9 @@ public_vars.points = init.generate_points()
 
 # Score 
 public_vars.score = 0
+
+# Start time
+public_vars.start_time = time.time()
 
 def handle_keystroke(key):
     global pacman
@@ -71,6 +75,4 @@ while running:
         point.render()
     textsurface = font.render('Score: {}'.format(public_vars.score), True, constants.WHITE)
     public_vars.screen.blit(textsurface, (constants.SCREEN_WIDTH/2,0))
-    #pygame.draw.circle(public_vars.screen, )
-    #pygame.draw.arc(public_vars.screen, )
     pygame.display.update()
