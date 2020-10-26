@@ -58,7 +58,7 @@ while running:
     red_ghost.move()
     green_ghost.move()
     pink_ghost.move()
-    orange_ghost.render()
+    orange_ghost.move()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
