@@ -108,7 +108,7 @@ class Character(Object):
         # Change the direction to be the desired direction if the desired direction is a valid option
         stored_x = self.x
         stored_y = self.y
-        self._basic_move(self.desired_direction, constants.ATTEMPTED_DISPLACEMENT)
+        self._basic_move(self.desired_direction, constants.CHARACTER_SIZE)
         if not self.overlapping_list(public_vars.walls):
             self.direction = self.desired_direction
         self.x = stored_x
@@ -130,23 +130,26 @@ class Ghost(Character):
         super().__init__(x, y, direction)
         self.name = name
         initial_image = pygame.image.load(image_path)
-        self.image = pygame.transform.scale(initial_image, (constants.CHARACTER_SIZE,constants.CHARACTER_SIZE))
+        self.image = pygame.transform.scale(initial_image, (round(constants.CHARACTER_SIZE),round(constants.CHARACTER_SIZE)))
         self.choose_destination = choose_destination
+        self.previously_on_intersection = False
 
     def render(self):
         public_vars.screen.blit(self.image, (self.x, self.y))
     
     def move(self):
-        # TODO: continue debugging ghost movement
-        tempx, tempy = self.x, self.y
         if self._on_intersection():
-            destination = self.choose_destination()
-            self._choose_direction(destination)
-        elif self._dead_end():
-            if self._on_intersection():
-                print("current coordinates: {}, {}; previous: {}, {}".format(self.x, self.y, tempx, tempy))
-                raise ValueError("Wasn't expecting on_intersection to be true here")
-            self._choose_direction(None)
+            # If we are on an intersection twice in a row, we should only choose the destination and direction once
+            if not self.previously_on_intersection:
+                destination = self.choose_destination()
+                self._choose_direction(destination)
+            self.previously_on_intersection = True
+        else:
+            self.previously_on_intersection = False
+            if self._dead_end():
+                if self._on_intersection():
+                    raise ValueError("Wasn't expecting on_intersection to be true here")
+                self._choose_direction(None)
         super().move()
     
     def _on_intersection(self):
@@ -183,7 +186,7 @@ class Ghost(Character):
         old_y = self.y
         valid_directions.remove(util.opposite_direction(self.direction))
         for direction in valid_directions[:]:
-            self._basic_move(direction, constants.ATTEMPTED_DISPLACEMENT)
+            self._basic_move(direction, constants.CHARACTER_SIZE)
             if self.overlapping_list(public_vars.walls):
                 valid_directions.remove(direction)
             self.x = old_x

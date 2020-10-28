@@ -72,16 +72,15 @@ class TestCharacter(unittest.TestCase):
         char.x = 100 - (LANE_SIZE - CHARACTER_SIZE)
         char.y = 100
         char.move()
-        self.assertEqual((char.x, char.y), (100 - (LANE_SIZE - CHARACTER_SIZE), 100 + CHARACTER_SPEED))
         self.assertEqual(char.direction, Direction.DOWN)
         self.assertEqual(char.desired_direction, Direction.RIGHT)
+        self.assertEqual((char.x, char.y), (100 - (LANE_SIZE - CHARACTER_SIZE), 100 + CHARACTER_SPEED))
     
 class TestGhost(unittest.TestCase):
 
     def setUp(self):
         public_vars.walls = []
 
-    # TODO: Test __in_center
     def test_in_center(self):
         green = Ghost("green", constants.SCREEN_WIDTH//2+constants.CHARACTER_SIZE//2, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2, constants.Direction.LEFT, "resources/green.png", lambda: (0,constants.SCREEN_HEIGHT))
         self.assertTrue(green._in_center())
@@ -101,10 +100,10 @@ class TestGhost(unittest.TestCase):
         green = Ghost("green", constants.LANE_VERTICAL_1_LONGITUDE-CHARACTER_SIZE/2, constants.LANE_HORIZONTAL_1_LATTITUDE-CHARACTER_SIZE/2, constants.Direction.UP, "resources/green.png", lambda: (0,constants.SCREEN_HEIGHT))
         self.assertFalse(green._on_intersection())
         # In the middle. Yes an intersection
-        green.x, green.y = constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2
+        green.x, green.y = constants.SCREEN_WIDTH/2-constants.CHARACTER_SIZE/2, constants.SCREEN_HEIGHT/2-constants.CHARACTER_SIZE/2
         self.assertTrue(green._on_intersection())
         # In the middle but 1 lane up. Yes an intersection
-        green.y = constants.LANE_HORIZONTAL_4_LATTITUDE - CHARACTER_SIZE//2
+        green.y = constants.LANE_HORIZONTAL_4_LATTITUDE - CHARACTER_SIZE/2
         self.assertTrue(green._on_intersection())
         # Between the middle and upper-middle lanes. Not an intersection
         green.y = constants.LANE_HORIZONTAL_4_LATTITUDE
@@ -118,23 +117,31 @@ class TestGhost(unittest.TestCase):
         green._choose_direction(green.choose_destination())
         self.assertEqual(constants.Direction.RIGHT, green.desired_direction)
         # In center, at intersection. Should choose to go up
-        green.x, green.y = constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2
+        green.x, green.y = constants.SCREEN_WIDTH/2-constants.CHARACTER_SIZE/2, constants.SCREEN_HEIGHT/2-constants.CHARACTER_SIZE/2
         green.direction, green.desired_direction = constants.Direction.LEFT, constants.Direction.LEFT
         green._choose_direction(green.choose_destination())
         self.assertEqual(constants.Direction.UP, green.desired_direction)
         # Just after getting out of the center. Should go left
-        green.y = constants.LANE_HORIZONTAL_4_LATTITUDE - CHARACTER_SIZE//2
+        green.y = constants.LANE_HORIZONTAL_4_LATTITUDE - CHARACTER_SIZE/2
         green.direction, green.desired_direction = constants.Direction.UP, constants.Direction.UP
         green._choose_direction(green.choose_destination())
         self.assertEqual(constants.Direction.LEFT, green.desired_direction)
+        # In the upper left corner, down one spot. heading down. Should go right
+        red = Ghost("red", constants.LANE_VERTICAL_1_LONGITUDE-CHARACTER_SIZE/2, constants.LANE_HORIZONTAL_2_LATTITUDE-CHARACTER_SIZE/2, constants.Direction.DOWN, "resources/red.png", lambda: (0,0))
+        self.assertTrue(red._on_intersection())
+        self.assertEqual(constants.Direction.DOWN, red.desired_direction)
+        red._choose_direction(red.choose_destination())
+        self.assertEqual(constants.Direction.RIGHT, red.desired_direction)
+        red_x, red_y = red.x, red.y
+        red.move()
+        self.assertEqual(red.direction, Direction.RIGHT)
+        self.assertEqual([red_x+CHARACTER_SPEED, red_y], [red.x, red_y])
         # In a dead end in the center. Should go backwards
-        # green.x, green.y = constants.WALL_LONGITUDE_4+constants.THIN_WALL_THICKNESS, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2
-        # green.direction, green.desired_direction = constants.Direction.LEFT, constants.Direction.LEFT
-        # green._choose_direction(green.choose_destination())
-        # self.assertEqual(constants.Direction.RIGHT, green.desired_direction)
+        green.x, green.y = constants.WALL_LONGITUDE_4+constants.THIN_WALL_THICKNESS, constants.SCREEN_HEIGHT/2-constants.CHARACTER_SIZE/2
+        green.direction, green.desired_direction = constants.Direction.LEFT, constants.Direction.LEFT
+        green._choose_direction(green.choose_destination())
+        self.assertEqual(constants.Direction.RIGHT, green.desired_direction)
         
-    # TODO: Test _choose_direction
-    # TODO: Test move
 
 
 

@@ -23,9 +23,9 @@ THIN_WALL_THICKNESS = 10
 MEDIUM_WALL_THICKNESS = 2 * THIN_WALL_THICKNESS
 THICK_WALL_THICKNESS = 4 * THIN_WALL_THICKNESS
 LANE_SIZE = 4 * THIN_WALL_THICKNESS
-CHARACTER_SIZE = LANE_SIZE - LANE_SIZE//10
-
-ATTEMPTED_DISPLACEMENT = (LANE_SIZE - CHARACTER_SIZE) * 2 
+# This size is important because as such, the character will only be at an intersection for 1 iteration
+# In addition, this will hopefully resolve small arithmetic errors in which the character is barely touching a wall
+CHARACTER_SIZE = LANE_SIZE - CHARACTER_SPEED*3/2 #LANE_SIZE//10
 
 # Board Settings
 # screen height = 10 lanes + 4 thin walls + 6 medium walls + 1 thick wall, + 4 outside lanes
