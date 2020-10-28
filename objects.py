@@ -137,6 +137,7 @@ class Ghost(Character):
         public_vars.screen.blit(self.image, (self.x, self.y))
     
     def move(self):
+        # TODO: continue debugging ghost movement
         tempx, tempy = self.x, self.y
         if self._on_intersection():
             destination = self.choose_destination()
@@ -176,6 +177,7 @@ class Ghost(Character):
         return dead_end
     
     def _choose_direction(self, destination):
+        # TODO: Debug this function. The ghosts keep going backwards when another option is available
         valid_directions = [constants.Direction.LEFT, constants.Direction.RIGHT, constants.Direction.UP, constants.Direction.DOWN]
         old_x = self.x
         old_y = self.y
