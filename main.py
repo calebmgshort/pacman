@@ -19,11 +19,11 @@ pygame.display.set_caption("Pacman")
 
 
 # Pacman
-pacman = objects.Pacman(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.WALL_LATITUDE_8+constants.MEDIUM_WALL_THICKNESS, constants.Direction.LEFT)
-red_ghost = objects.Ghost(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2, constants.Direction.DOWN, "resources/red.png")
-green_ghost = objects.Ghost(constants.SCREEN_WIDTH//2+constants.CHARACTER_SIZE//2, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2, constants.Direction.RIGHT, "resources/green.png")
-pink_ghost = objects.Ghost(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2-constants.CHARACTER_SIZE, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2, constants.Direction.LEFT, "resources/pink.png")
-orange_ghost = objects.Ghost(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2-constants.CHARACTER_SIZE, constants.Direction.UP, "resources/orange.png")
+pacman = objects.Pacman(constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.WALL_LATITUDE_8+constants.MEDIUM_WALL_THICKNESS, constants.Direction.RIGHT)
+red_ghost = objects.Ghost("red", constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2-constants.CHARACTER_SIZE, constants.Direction.UP, "resources/red.png", lambda: (0,0))
+green_ghost = objects.Ghost("green", constants.SCREEN_WIDTH//2+constants.CHARACTER_SIZE//2, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2, constants.Direction.LEFT, "resources/green.png", lambda: (0,constants.SCREEN_HEIGHT))
+pink_ghost = objects.Ghost("pink", constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2-constants.CHARACTER_SIZE, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2, constants.Direction.LEFT, "resources/pink.png", lambda: (constants.SCREEN_WIDTH,0))
+orange_ghost = objects.Ghost("orange", constants.SCREEN_WIDTH//2-constants.CHARACTER_SIZE//2, constants.SCREEN_HEIGHT//2-constants.CHARACTER_SIZE//2, constants.Direction.UP, "resources/orange.png", lambda: (constants.SCREEN_WIDTH,constants.SCREEN_HEIGHT))
 
 
 # Walls

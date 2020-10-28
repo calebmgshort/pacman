@@ -1,6 +1,7 @@
 import pygame
 import pygame.gfxdraw
 import constants
+import util
 import public_vars
 import abc
 import math
@@ -43,6 +44,12 @@ class Object:
 
     def overlapping(self, other):
         return self.__overlapping_with_orientation(other, constants.Orientation.HORIZONTAL) and self.__overlapping_with_orientation(other, constants.Orientation.VERTICAL)
+    
+    def overlapping_list(self, other_list):
+        for other in other_list:
+            if self.overlapping(other):
+                return True
+        return False
 
 class Wall(Object):
     def __init__(self, left, top, orientation, thickness, length):
@@ -55,7 +62,7 @@ class Wall(Object):
             width = thickness
             height = length
         else:
-            raise TypeError("The orientation provided is invalid")
+            raise ValueError("The direction is not a valid enum value")
         super().__init__(left, width, top, height)
         self.object = pygame.Rect(left, top, width, height)
 
@@ -85,63 +92,129 @@ class Character(Object):
         self.direction = direction
         self.desired_direction = direction
     
-    def move(self):
-        old_x = self.x
-        old_y = self.y
-        if self.direction == constants.Direction.RIGHT:
-            self.x += constants.CHARACTER_SPEED
-        elif self.direction == constants.Direction.LEFT:
-            self.x -= constants.CHARACTER_SPEED
-        elif self.direction == constants.Direction.UP:
-            self.y -= constants.CHARACTER_SPEED
-        elif self.direction == constants.Direction.DOWN:
-            self.y += constants.CHARACTER_SPEED
+    def _basic_move(self, direction, diplacement):
+        if direction == constants.Direction.RIGHT:
+            self.x += diplacement
+        elif direction == constants.Direction.LEFT:
+            self.x -= diplacement
+        elif direction == constants.Direction.UP:
+            self.y -= diplacement
+        elif direction == constants.Direction.DOWN:
+            self.y += diplacement
         else:
-            raise TypeError("The direction is not a valid type")
+            raise ValueError("The direction is not a valid enum value")
+    
+    def move(self):
+        # Change the direction to be the desired direction if the desired direction is a valid option
+        stored_x = self.x
+        stored_y = self.y
+        self._basic_move(self.desired_direction, constants.ATTEMPTED_DISPLACEMENT)
+        if not self.overlapping_list(public_vars.walls):
+            self.direction = self.desired_direction
+        self.x = stored_x
+        self.y = stored_y
+        # Make the most basic move
+        self._basic_move(self.direction, constants.CHARACTER_SPEED)
         # Handle the case where we've reached the edge of the map
         if self.x < constants.WALL_LONGITUDE_1:
             self.x = constants.WALL_LONGITUDE_9 + constants.THIN_WALL_THICKNESS - constants.CHARACTER_SIZE
         if self.x > constants.WALL_LONGITUDE_9 + constants.THIN_WALL_THICKNESS - constants.CHARACTER_SIZE:
             self.x = constants.WALL_LONGITUDE_1
         # Handle the case where we've run into a wall
-        for wall in public_vars.walls:
-            if self.overlapping(wall):
-                self.x = old_x
-                self.y = old_y
-                break
-        
-        # Change the direction to be the desired direction if the desired direction is a valid option
-        desired_direction_valid = True
-        stored_x = self.x
-        stored_y = self.y
-        attempted_displacement = (constants.LANE_SIZE - constants.CHARACTER_SIZE) * 2 
-        if self.desired_direction == constants.Direction.RIGHT:
-            self.x += attempted_displacement
-        elif self.desired_direction == constants.Direction.LEFT:
-            self.x -= attempted_displacement
-        elif self.desired_direction == constants.Direction.UP:
-            self.y -= attempted_displacement
-        elif self.desired_direction == constants.Direction.DOWN:
-            self.y += attempted_displacement
-        else:
-            raise TypeError("The direction is not a valid type")
-        for wall in public_vars.walls:
-            if self.overlapping(wall):
-                desired_direction_valid = False
-                break
-        if desired_direction_valid:
-            self.direction = self.desired_direction
-        self.x = stored_x
-        self.y = stored_y
+        if self.overlapping_list(public_vars.walls):
+            self.x = stored_x
+            self.y = stored_y
 
 class Ghost(Character):
-    def __init__(self, x, y, direction, image_path):
+    def __init__(self, name, x, y, direction, image_path, choose_destination):
         super().__init__(x, y, direction)
+        self.name = name
         initial_image = pygame.image.load(image_path)
         self.image = pygame.transform.scale(initial_image, (constants.CHARACTER_SIZE,constants.CHARACTER_SIZE))
+        self.choose_destination = choose_destination
 
     def render(self):
         public_vars.screen.blit(self.image, (self.x, self.y))
+    
+    def move(self):
+        tempx, tempy = self.x, self.y
+        if self._on_intersection():
+            destination = self.choose_destination()
+            self._choose_direction(destination)
+        elif self._dead_end():
+            if self._on_intersection():
+                print("current coordinates: {}, {}; previous: {}, {}".format(self.x, self.y, tempx, tempy))
+                raise ValueError("Wasn't expecting on_intersection to be true here")
+            self._choose_direction(None)
+        super().move()
+    
+    def _on_intersection(self):
+        old_x = self.x
+        old_y = self.y
+        num_options = -1 # Because the option to go backwards is not an option
+        self.x = old_x + constants.CHARACTER_SIZE
+        if not self.overlapping_list(public_vars.walls):
+            num_options += 1
+        self.x = old_x - constants.CHARACTER_SIZE
+        if not self.overlapping_list(public_vars.walls):
+            num_options += 1
+        self.x = old_x
+        self.y = old_y + constants.CHARACTER_SIZE
+        if not self.overlapping_list(public_vars.walls):
+            num_options += 1
+        self.y = old_y - constants.CHARACTER_SIZE
+        if not self.overlapping_list(public_vars.walls):
+            num_options += 1     
+        self.x = old_x
+        self.y = old_y
+        return num_options >= 2
+    
+    def _dead_end(self):
+        self._basic_move(self.direction, constants.CHARACTER_SPEED)
+        dead_end = self.overlapping_list(public_vars.walls)
+        self._basic_move(util.opposite_direction(self.direction), constants.CHARACTER_SPEED)
+        return dead_end
+    
+    def _choose_direction(self, destination):
+        valid_directions = [constants.Direction.LEFT, constants.Direction.RIGHT, constants.Direction.UP, constants.Direction.DOWN]
+        old_x = self.x
+        old_y = self.y
+        valid_directions.remove(util.opposite_direction(self.direction))
+        for direction in valid_directions[:]:
+            self._basic_move(direction, constants.ATTEMPTED_DISPLACEMENT)
+            if self.overlapping_list(public_vars.walls):
+                valid_directions.remove(direction)
+            self.x = old_x
+            self.y = old_y
+        if len(valid_directions) == 1:
+            self.desired_direction = valid_directions.pop()
+        elif len(valid_directions) > 1:
+            if self._in_center():
+                self.desired_direction = constants.Direction.UP
+                return
+            best_distance = constants.SCREEN_WIDTH + constants.SCREEN_HEIGHT
+            best_direction = None
+            for direction in valid_directions:
+                self._basic_move(direction, constants.CHARACTER_SPEED)
+                distance = 0
+                try:
+                    distance = util.distance((self.x, self.y), destination)
+                except TypeError:
+                    print("Name: {}, Pos: ({},{}), __in_center: {}, _on_intersection: {}".format(self.name, self.x, self.y, self._in_center(), self._on_intersection()))
+                    raise TypeError("Distance called with value None")
+                if distance < best_distance:
+                    best_distance = distance
+                    best_direction = direction
+                self.x = old_x
+                self.y = old_y
+            self.desired_direction = best_direction
+        else:
+            self.desired_direction = util.opposite_direction(self.direction)
+    
+    def _in_center(self):
+        return self.x > constants.WALL_LONGITUDE_4 and self.x < constants.WALL_LONGITUDE_6 and (
+            self.y > constants.WALL_LATITUDE_5_INSIDE and self.y < constants.WALL_LATITUDE_6_INSIDE)
+
 
 def draw_pacman_mouth(center_x, center_y, max_angle, direction):
     # Calculate current angle.
@@ -154,7 +227,6 @@ def draw_pacman_mouth(center_x, center_y, max_angle, direction):
         angle = max_angle - max_angle*time_dif*2
     else: 
         angle = max_angle * (time_dif - 0.5) * 2
-    # print("Time dif: {}, Angle: {}".format(time_dif, angle))
     angle = int(angle)
     extra = angle % 5
     angle -= extra
@@ -173,8 +245,6 @@ def draw_pacman_mouth(center_x, center_y, max_angle, direction):
         pygame.draw.polygon(public_vars.screen, constants.BLACK, [(center_x, center_y), (center_x-opposite, center_y+adjacent), (center_x+opposite, center_y+adjacent)])   
     else:
         raise ValueError("Direction not valid")
-
-
 
 class Pacman(Character):
     def __init__(self, x, y, direction):
