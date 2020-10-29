@@ -206,7 +206,7 @@ class Ghost(Character):
                     distance = util.distance((self.x, self.y), destination)
                 except TypeError:
                     print("Name: {}, Pos: ({},{}), __in_center: {}, _on_intersection: {}".format(self.name, self.x, self.y, self._in_center(), self._on_intersection()))
-                    raise TypeError("Distance called with value None")
+                    raise TypeError("Distance called with invalid value")
                 if distance < best_distance:
                     best_distance = distance
                     best_direction = direction

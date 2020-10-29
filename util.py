@@ -16,3 +16,4 @@ def distance(point1, point2):
     leg1 = abs(point1[0] - point2[0])
     leg2 = abs(point1[1] - point2[1])
     return math.sqrt(leg1**2 + leg2**2)
+
