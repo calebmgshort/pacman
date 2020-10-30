@@ -11,11 +11,21 @@ class Orientation(Enum):
     HORIZONTAL = 0
     VERTICAL = 1
 
+class GameMode(Enum):
+    HOME_SCREEN = 0
+    NORMAL = 1
+    PAUSE = 2
+    VICTORY = 3
+    GAME_OVER = 4
+    CLOSE_WINDOW = 5
+
 BLACK = (0,0,0)
 BLUE = (0,0,255)
 LIGHT_PINK = (255,204,229)
 WHITE = (255,255,255)
 YELLOW = (255,255,0)
+LIGHT_GRAY = (170,170,170)
+DARK_GRAY = (100,100,100)
 
 # Default settings
 CHARACTER_SPEED = 0.2

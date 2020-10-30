@@ -10,7 +10,6 @@ from ghost_algorithms import *
 pygame.init()
 # Initialize text
 pygame.font.init()
-font = pygame.font.Font('freesansbold.ttf', 30)
 
 # Create the screen
 public_vars.screen = pygame.display.set_mode((constants.SCREEN_WIDTH,constants.SCREEN_HEIGHT))
@@ -18,63 +17,117 @@ public_vars.screen = pygame.display.set_mode((constants.SCREEN_WIDTH,constants.S
 # Title
 pygame.display.set_caption("Pacman")
 
+def pacman_eaten():
+    for ghost in public_vars.ghosts:
+        if public_vars.pacman.overlapping(ghost):
+            return True
+    return False
 
-# Pacman
-# TODO: Write ghost destination algorithm
-public_vars.pacman = objects.Pacman(constants.SCREEN_WIDTH/2-constants.CHARACTER_SIZE/2, constants.WALL_LATITUDE_8+constants.MEDIUM_WALL_THICKNESS, constants.Direction.LEFT)
-public_vars.red_ghost = objects.Ghost("red", constants.SCREEN_WIDTH/2-constants.CHARACTER_SIZE/2, constants.SCREEN_HEIGHT/2-constants.CHARACTER_SIZE/2-constants.CHARACTER_SIZE, constants.Direction.UP, "resources/red.png", destination_red)
-public_vars.green_ghost = objects.Ghost("green", constants.SCREEN_WIDTH/2+constants.CHARACTER_SIZE/2, constants.SCREEN_HEIGHT/2-constants.CHARACTER_SIZE/2, constants.Direction.LEFT, "resources/green.png", destination_green)
-public_vars.pink_ghost = objects.Ghost("pink", constants.SCREEN_WIDTH/2-constants.CHARACTER_SIZE/2-constants.CHARACTER_SIZE, constants.SCREEN_HEIGHT/2-constants.CHARACTER_SIZE/2, constants.Direction.LEFT, "resources/pink.png", destination_pink)
-public_vars.orange_ghost = objects.Ghost("orange", constants.SCREEN_WIDTH/2-constants.CHARACTER_SIZE/2, constants.SCREEN_HEIGHT/2-constants.CHARACTER_SIZE/2, constants.Direction.UP, "resources/orange.png", destination_orange)
+def pause_mode():
+    pause_button = pygame.Rect(0, 0, 300, 150)
+    pause_button.center = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2) 
+    font = pygame.font.SysFont('freesansbold.ttf', 30)
+    text_surface = font.render('Game Paused', False, constants.WHITE)
+    text_rect = text_surface.get_rect(center=pause_button.center)
+    subfont = pygame.font.SysFont('freesansbold.ttf', 15)
+    subtext_surface = subfont.render("press spacebar or 'p' to resume", False, constants.WHITE)
+    subtext_rect = text_surface.get_rect(center=(pause_button.center[0], pause_button.center[1]+30))
+    pygame.draw.rect(public_vars.screen, DARK_GRAY, pause_button)
+    public_vars.screen.blit(text_surface, text_rect) 
+    public_vars.screen.blit(subtext_surface, subtext_rect) 
+    pygame.display.update()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
+                return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE or event.key == pygame.K_p:
+                    public_vars.game_mode = constants.GameMode.NORMAL
+                    return 
+                elif event.key == pygame.K_q:
+                    # TODO: diplay a "are you sure you want to quit" button
+                    public_vars.game_mode = constants.GameMode.HOME_SCREEN
+                    return  
+def normal_mode():
+    font = pygame.font.Font('freesansbold.ttf', 30)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
+                return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    public_vars.pacman.desired_direction = constants.Direction.LEFT
+                elif event.key == pygame.K_RIGHT:
+                    public_vars.pacman.desired_direction = constants.Direction.RIGHT
+                elif event.key == pygame.K_UP:
+                    public_vars.pacman.desired_direction = constants.Direction.UP
+                elif event.key == pygame.K_DOWN:
+                    public_vars.pacman.desired_direction = constants.Direction.DOWN
+                elif event.key == pygame.K_SPACE or event.key == pygame.K_p:
+                    public_vars.game_mode = constants.GameMode.PAUSE
+                    return 
+                elif event.key == pygame.K_q:
+                    # TODO: diplay a "are you sure you want to quit" button
+                    public_vars.game_mode = constants.GameMode.HOME_SCREEN
+                    return 
+        public_vars.pacman.move()
+        for ghost in public_vars.ghosts:
+            ghost.move()
+        if pacman_eaten():
+            # TODO: switch to game over mode. Display the score
+            #while True:
+            pass
+        public_vars.screen.fill(constants.BLACK)
+        public_vars.pacman.render()
+        for point in public_vars.points:
+            point.render()
+        for ghost in public_vars.ghosts:
+            ghost.render()
+        for wall in public_vars.walls:
+            wall.render()
+        textsurface = font.render('Score: {}'.format(public_vars.score), True, constants.WHITE)
+        public_vars.screen.blit(textsurface, (constants.SCREEN_WIDTH/2,0))
+        pygame.display.update()
 
-
-# Walls
-public_vars.walls = init.generate_walls()
-
-# Points
-public_vars.points = init.generate_points()
-
-# Score 
-public_vars.score = 0
-
-# Start time
-public_vars.start_time = time.time()
-
-def handle_keystroke(key):
-    global pacman
-    if key == pygame.K_LEFT:
-        public_vars.pacman.desired_direction = constants.Direction.LEFT
-    elif key == pygame.K_RIGHT:
-        public_vars.pacman.desired_direction = constants.Direction.RIGHT
-    elif key == pygame.K_UP:
-        public_vars.pacman.desired_direction = constants.Direction.UP
-    elif key == pygame.K_DOWN:
-        public_vars.pacman.desired_direction = constants.Direction.DOWN
-
+def home_screen_mode():
+    public_vars.screen.fill(constants.BLACK)
+    title_font = pygame.font.Font('freesansbold.ttf', 40)
+    title_surface = title_font.render('Welcome to Pacman!', False, constants.YELLOW)
+    title_rect = title_surface.get_rect(center=(constants.SCREEN_WIDTH/2, constants.SCREEN_HEIGHT/3))
+    public_vars.screen.blit(title_surface, title_rect)
+    subtitle_font = pygame.font.Font('freesansbold.ttf', 20)
+    subtitle_surface = subtitle_font.render('(press spacebar or click anywhere to play)', False, constants.YELLOW)
+    subtitle_rect = subtitle_surface.get_rect(center=(constants.SCREEN_WIDTH/2, constants.SCREEN_HEIGHT/3 + 40))
+    public_vars.screen.blit(subtitle_surface, subtitle_rect)
+    pygame.display.update()
+    while True:
+        switch_to_normal_mode = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
+                return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE or event.key == pygame.K_KP_ENTER:
+                    switch_to_normal_mode = True
+            if pygame.mouse.get_pressed()[0]:
+                switch_to_normal_mode = True
+        if switch_to_normal_mode:
+            init.initialize_game_data()
+            public_vars.game_mode = constants.GameMode.NORMAL
+            return 
 
 # Game loop
-running = True
-while running:
-    public_vars.screen.fill(constants.BLACK)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.KEYDOWN:
-            handle_keystroke(event.key)
-    public_vars.pacman.move()
-    public_vars.red_ghost.move()
-    public_vars.green_ghost.move()
-    public_vars.pink_ghost.move()
-    public_vars.orange_ghost.move()
-    public_vars.pacman.render()
-    for point in public_vars.points:
-        point.render()
-    public_vars.red_ghost.render()
-    public_vars.green_ghost.render()
-    public_vars.pink_ghost.render()
-    public_vars.orange_ghost.render()
-    for wall in public_vars.walls:
-        wall.render()
-    textsurface = font.render('Score: {}'.format(public_vars.score), True, constants.WHITE)
-    public_vars.screen.blit(textsurface, (constants.SCREEN_WIDTH/2,0))
-    pygame.display.update()
+public_vars.game_mode = constants.GameMode.HOME_SCREEN
+while True:
+    if public_vars.game_mode == constants.GameMode.HOME_SCREEN:
+        home_screen_mode()
+    elif public_vars.game_mode == constants.GameMode.NORMAL:
+        normal_mode()
+    elif public_vars.game_mode == constants.GameMode.PAUSE:
+        pause_mode()
+    elif public_vars.game_mode == constants.GameMode.CLOSE_WINDOW:
+        break
+    else:
+        raise ValueError("The game mode is invalid")    

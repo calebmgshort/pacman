@@ -1,7 +1,9 @@
 import pygame
 from constants import *
 import public_vars
-from objects import Wall, Point
+from objects import *
+import time
+from ghost_algorithms import *
 
 def generate_walls():
     walls = []
@@ -107,3 +109,24 @@ def generate_points():
         add_point(points, LANE_VERTICAL_3_LONGITUDE, y)
         add_point(points, LANE_VERTICAL_8_LONGITUDE, y)
     return points
+
+def initialize_game_data():
+    # Pacman
+    public_vars.pacman = Pacman(constants.SCREEN_WIDTH/2-constants.CHARACTER_SIZE/2, constants.WALL_LATITUDE_8+constants.MEDIUM_WALL_THICKNESS, constants.Direction.LEFT)
+    public_vars.red_ghost = Ghost("red", constants.SCREEN_WIDTH/2-constants.CHARACTER_SIZE/2, constants.SCREEN_HEIGHT/2-constants.CHARACTER_SIZE/2-constants.CHARACTER_SIZE, constants.Direction.UP, "resources/red.png", destination_red)
+    public_vars.green_ghost = Ghost("green", constants.SCREEN_WIDTH/2+constants.CHARACTER_SIZE/2, constants.SCREEN_HEIGHT/2-constants.CHARACTER_SIZE/2, constants.Direction.LEFT, "resources/green.png", destination_green)
+    public_vars.pink_ghost = Ghost("pink", constants.SCREEN_WIDTH/2-constants.CHARACTER_SIZE/2-constants.CHARACTER_SIZE, constants.SCREEN_HEIGHT/2-constants.CHARACTER_SIZE/2, constants.Direction.LEFT, "resources/pink.png", destination_pink)
+    public_vars.orange_ghost = Ghost("orange", constants.SCREEN_WIDTH/2-constants.CHARACTER_SIZE/2, constants.SCREEN_HEIGHT/2-constants.CHARACTER_SIZE/2, constants.Direction.UP, "resources/orange.png", destination_orange)
+    public_vars.ghosts = [public_vars.red_ghost, public_vars.green_ghost, public_vars.pink_ghost, public_vars.orange_ghost]
+
+    # Walls
+    public_vars.walls = generate_walls()
+
+    # Points
+    public_vars.points = generate_points()
+
+    # Score 
+    public_vars.score = 0
+
+    # Start time
+    public_vars.start_time = time.time()
