@@ -23,6 +23,34 @@ def pacman_eaten():
             return True
     return False
 
+def game_over_mode():
+    public_vars.screen.fill(constants.BLACK)
+    title_font = pygame.font.Font('freesansbold.ttf', 40)
+    title_surface = title_font.render('GAME OVER!', False, constants.RED)
+    title_rect = title_surface.get_rect(center=(constants.SCREEN_WIDTH/2, constants.SCREEN_HEIGHT/3))
+    public_vars.screen.blit(title_surface, title_rect)
+    subtitle_font = pygame.font.Font('freesansbold.ttf', 20)
+    subtitle_surface = subtitle_font.render('press spacebar to play again, or q to return to the homescreen', False, constants.RED)
+    subtitle_rect = subtitle_surface.get_rect(center=(constants.SCREEN_WIDTH/2, constants.SCREEN_HEIGHT/3 + 40))
+    public_vars.screen.blit(subtitle_surface, subtitle_rect)
+    pygame.display.update()
+    while True:
+        switch_to_normal_mode = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
+                return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    switch_to_normal_mode = True
+                if event.key == pygame.K_q:
+                    public_vars.game_mode = constants.GameMode.HOME_SCREEN
+                    return
+        if switch_to_normal_mode:
+            init.initialize_game_data()
+            public_vars.game_mode = constants.GameMode.NORMAL
+            return 
+
 def pause_mode():
     pause_button = pygame.Rect(0, 0, 300, 150)
     pause_button.center = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2) 
@@ -77,8 +105,8 @@ def normal_mode():
             ghost.move()
         if pacman_eaten():
             # TODO: switch to game over mode. Display the score
-            #while True:
-            pass
+            public_vars.game_mode = constants.GameMode.GAME_OVER
+            return
         public_vars.screen.fill(constants.BLACK)
         public_vars.pacman.render()
         for point in public_vars.points:
@@ -127,6 +155,8 @@ while True:
         normal_mode()
     elif public_vars.game_mode == constants.GameMode.PAUSE:
         pause_mode()
+    elif public_vars.game_mode == constants.GameMode.GAME_OVER:
+        game_over_mode()
     elif public_vars.game_mode == constants.GameMode.CLOSE_WINDOW:
         break
     else:
