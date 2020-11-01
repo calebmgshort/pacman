@@ -11,8 +11,8 @@ start_time = None
 game_mode = None
 
 pacman = None
-# red_ghost = None
-# green_ghost = None
-# pink_ghost = None
-# orange_ghost = None
-# ghosts = None
+red_ghost = None
+green_ghost = None
+pink_ghost = None
+orange_ghost = None
+ghosts = None

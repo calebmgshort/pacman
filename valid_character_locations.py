@@ -43,3 +43,13 @@ class ValidCharacterLocations():
             if ValidCharacterLocations.__val_in_list(coordinates[1], ValidCharacterLocations.__valid_vertical_locs[coordinates[0]]):
                 return True
         return False
+
+    @staticmethod
+    def on_intersection(coordinates: Tuple[float, float]) -> bool:
+        # From this location, we must be able to move in 3 locations and still be in a valid location
+        num_valid_directions = 0
+        coordinates_to_try = [(coordinates[0]+CHARACTER_SPEED, coordinates[1]), (coordinates[0]-CHARACTER_SPEED, coordinates[1]), (coordinates[0], coordinates[1]-CHARACTER_SPEED), (coordinates[0], coordinates[1]+CHARACTER_SPEED)]
+        for a_coordinates in coordinates_to_try:
+            if ValidCharacterLocations.valid_coordinates(a_coordinates):
+                num_valid_directions += 1
+        return num_valid_directions >= 3

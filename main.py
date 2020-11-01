@@ -101,8 +101,8 @@ def normal_mode():
                 #     public_vars.game_mode = constants.GameMode.HOME_SCREEN
                 #     return 
         public_vars.pacman.move()
-        # for ghost in public_vars.ghosts:
-        #     ghost.move()
+        for ghost in public_vars.ghosts:
+            ghost.move()
         # if pacman_eaten():
         #     # TODO: switch to game over mode. Display the score
         #     public_vars.game_mode = constants.GameMode.GAME_OVER
@@ -111,8 +111,8 @@ def normal_mode():
         public_vars.pacman.render()
         # for point in public_vars.points:
         #     point.render()
-        # for ghost in public_vars.ghosts:
-        #     ghost.render()
+        for ghost in public_vars.ghosts:
+            ghost.render()
         for wall in public_vars.walls:
             wall.render()
         textsurface = font.render('Score: {}'.format(public_vars.score), True, constants.WHITE)

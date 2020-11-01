@@ -22,5 +22,21 @@ class TestValidCharacterLocations(unittest.TestCase):
         self.assertFalse(ValidCharacterLocations.valid_coordinates((LANE_VERTICAL_10_LONGITUDE, LANE_HORIZONTAL_10_LATTITUDE + 0.2)))
         self.assertFalse(ValidCharacterLocations.valid_coordinates((LANE_VERTICAL_5_LONGITUDE - THIN_WALL_THICKNESS - 0.1, LANE_HORIZONTAL_5_LATTITUDE)))
 
+    def test_on_intersection(self):
+        # 0 valid outgoing locations: not intersection
+        self.assertFalse(ValidCharacterLocations.on_intersection((LANE_VERTICAL_1_LONGITUDE + LANE_SIZE, LANE_HORIZONTAL_1_LATTITUDE + LANE_SIZE)))
+        # 1 valid outgoing locations: not intersection
+        self.assertFalse(ValidCharacterLocations.on_intersection((LANE_VERTICAL_1_LONGITUDE, LANE_HORIZONTAL_1_LATTITUDE + LANE_SIZE)))
+        # 2 valid outgoing locations: not intersection
+        self.assertFalse(ValidCharacterLocations.on_intersection((LANE_VERTICAL_1_LONGITUDE, LANE_HORIZONTAL_1_LATTITUDE)))
+        # 3 valid outgoing locations: yes, intersection
+        self.assertTrue(ValidCharacterLocations.on_intersection((LANE_VERTICAL_5_LONGITUDE, LANE_HORIZONTAL_2_LATTITUDE)))
+        # 4 valid outgoing locations: yes, intersection
+        self.assertTrue(ValidCharacterLocations.on_intersection((LANE_VERTICAL_3_LONGITUDE, LANE_HORIZONTAL_2_LATTITUDE)))
+
+        # Extra tests
+        # TODO: Debug why this one is failing
+        self.assertTrue(ValidCharacterLocations.on_intersection((LANE_VERTICAL_1_LONGITUDE, LANE_HORIZONTAL_2_LATTITUDE)))
+
 if __name__ == '__main__':
     unittest.main()
