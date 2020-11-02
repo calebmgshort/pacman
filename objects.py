@@ -7,10 +7,44 @@ import abc
 import math
 import time
 from valid_character_locations import ValidCharacterLocations
+from typing import Tuple
 
 
-class Wall():
-    def __init__(self, left, top, orientation, thickness, length):
+class Overlappable:
+    def __init__(self, x: float, width: float, y: float, height: float):
+        self.x = x
+        self.width = width
+        self.y = y
+        self.height = height
+    
+    def __overlapping_with_orientation(self, other: 'Overlappable', orientation: constants.Direction) -> bool:
+        self_begin, self_end, other_begin, other_end = 0,0,0,0
+        if orientation == constants.Orientation.HORIZONTAL:
+            self_begin = self.x
+            self_end = self.x + self.width
+            other_begin = other.x
+            other_end = other.x + other.width
+        elif orientation == constants.Orientation.VERTICAL:
+            self_begin = self.y
+            self_end = self.y + self.height
+            other_begin = other.y
+            other_end = other.y + other.height
+        else:
+            raise TypeError("The orientation type is not valid!")
+
+        # This's edge is within other's frame
+        if (self_begin < other_end and self_begin > other_begin) or (self_end < other_end and self_end > other_begin):
+            return True
+        # Other's edge is within this's frame
+        if (other_begin < self_end and other_begin > self_begin) or (other_end < self_end and other_end > self_begin):
+            return True
+        return False
+
+    def overlapping(self, other: 'Overlappable') -> bool:
+        return self.__overlapping_with_orientation(other, constants.Orientation.HORIZONTAL) and self.__overlapping_with_orientation(other, constants.Orientation.VERTICAL)
+
+class Wall(Overlappable):
+    def __init__(self, left: float, top: float, orientation: float, thickness: float, length: float):
         width = 0
         height = 0
         if orientation == constants.Orientation.HORIZONTAL:
@@ -21,16 +55,30 @@ class Wall():
             height = length
         else:
             raise ValueError("The direction is not a valid enum value")
+        super().__init__(left, width, top, height)
         self.object = pygame.Rect(left, top, width, height)
 
     def render(self):
         pygame.draw.rect(public_vars.screen, constants.BLUE, self.object)
 
-class Circle():
-    def __init__(self, x, y, radius, color):
+
+class Collidable():
+    def __init__(self, x: float, y: float, radius: float):
         self.x = x
         self.y = y
         self.radius = radius
+        self.overlappable = Overlappable(x-radius, radius*2, y-radius, radius*2)
+
+    def collides(self, other: 'Collidable') -> bool:
+        return util.distance((self.x, self.y), (other.x, other.y)) < self.radius + other.radius
+    
+    def overlaps_something(self, other: Overlappable) -> bool:
+        return self.overlappable.overlapping(other)
+
+
+class Circle(Collidable):
+    def __init__(self, x: float, y: float, radius: float, color: Tuple[int, int, int]):
+        super().__init__(x, y, radius)
         self.color = color
     
     def render(self):
@@ -38,15 +86,14 @@ class Circle():
 
 
 class Point(Circle):
-    def __init__(self, x, y):
+    def __init__(self, x: float, y: float):
         super().__init__(x, y, 4, constants.LIGHT_PINK)
 
-class Character():
+class Character(Collidable):
     __metaclass__ = abc.ABCMeta
     
-    def __init__(self, x, y, direction):
-        self.x = x
-        self.y = y
+    def __init__(self, x: float, y: float, direction: constants.Direction):
+        Collidable.__init__(self, x, y, constants.LANE_SIZE/2)
         self.direction = direction
         self.desired_direction = direction
     
@@ -91,7 +138,7 @@ class Character():
             raise Exception("Move (end): character in invalid location")
 
 class Ghost(Character):
-    def __init__(self, name, x, y, direction, image_path, choose_destination):
+    def __init__(self, name: str, x: float, y: float, direction: constants.Direction, image_path: str, choose_destination):
         super().__init__(x, y, direction)
         self.name = name
         initial_image = pygame.image.load(image_path)
@@ -169,7 +216,7 @@ class Ghost(Character):
             self.y > constants.WALL_LATITUDE_5_INSIDE and self.y < constants.WALL_LATITUDE_6_INSIDE)
 
 
-def draw_pacman_mouth(center_x, center_y, max_angle, direction):
+def draw_pacman_mouth(center_x: float, center_y: float, max_angle: float, direction: constants.Direction):
     # Calculate current angle.
     angle = 0
 
@@ -200,16 +247,16 @@ def draw_pacman_mouth(center_x, center_y, max_angle, direction):
         raise ValueError("Direction not valid")
 
 class Pacman(Character, Circle):
-    def __init__(self, x, y, direction):
+    def __init__(self, x: float, y: float, direction: constants.Direction):
         Character.__init__(self, x, y, direction)
         Circle.__init__(self, x, y, constants.LANE_SIZE/2, constants.YELLOW)
 
     def move(self):
         super().move()
-        # for point in public_vars.points:
-        #     if(self.overlapping(point)):
-        #         public_vars.score += 10
-        #         public_vars.points.remove(point)
+        for point in public_vars.points:
+            if(self.collides(point)):
+                public_vars.score += 10
+                public_vars.points.remove(point)
     
     def render(self):
         Circle.render(self)

@@ -88,27 +88,24 @@ def generate_walls():
     walls.append(Wall(WALL_LONGITUDE_9, WALL_LATITUDE_7_OUTSIDE, Orientation.VERTICAL, THIN_WALL_THICKNESS, WALL_VERTICAL_LENGTH_2))
     return walls
 
-# def add_point(points, x, y):
-#     point = Point(x, y)
-#     overlapping = False
-#     for wall in public_vars.walls:
-#         if point.overlapping(wall):
-#             overlapping = True
-#             break
-#     if not overlapping:
-#         points.append(point)
+def add_point(points, x, y):
+    point = Point(x, y)
+    for wall in public_vars.walls:
+        if point.overlaps_something(wall):
+            return
+    points.append(point)
 
-# def generate_points():
-#     points = []
-#     for y in range(LANE_HORIZONTAL_1_LATTITUDE, LANE_HORIZONTAL_10_LATTITUDE+1, LANE_SIZE//2):
-#         if y > LANE_HORIZONTAL_3_LATTITUDE and y < LANE_HORIZONTAL_7_LATTITUDE:
-#             continue
-#         for x in range(LANE_VERTICAL_1_LONGITUDE, LANE_VERTICAL_10_LONGITUDE+1, LANE_SIZE//2):
-#             add_point(points, x, y)
-#     for y in range(LANE_HORIZONTAL_3_LATTITUDE+LANE_SIZE//2, LANE_HORIZONTAL_7_LATTITUDE-1, LANE_SIZE//2):
-#         add_point(points, LANE_VERTICAL_3_LONGITUDE, y)
-#         add_point(points, LANE_VERTICAL_8_LONGITUDE, y)
-#     return points
+def generate_points():
+    points = []
+    for y in range(int(LANE_HORIZONTAL_1_LATTITUDE), int(LANE_HORIZONTAL_10_LATTITUDE+1), int(LANE_SIZE//2)):
+        if y > LANE_HORIZONTAL_3_LATTITUDE and y < LANE_HORIZONTAL_7_LATTITUDE:
+            continue
+        for x in range(int(LANE_VERTICAL_1_LONGITUDE), int(LANE_VERTICAL_10_LONGITUDE+1), int(LANE_SIZE//2)):
+            add_point(points, x, y)
+    for y in range(int(LANE_HORIZONTAL_3_LATTITUDE+LANE_SIZE//2), int(LANE_HORIZONTAL_7_LATTITUDE-1), int(LANE_SIZE//2)):
+        add_point(points, LANE_VERTICAL_3_LONGITUDE, y)
+        add_point(points, LANE_VERTICAL_8_LONGITUDE, y)
+    return points
 
 def initialize_game_data():
     public_vars.pacman = Pacman(LANE_VERTICAL_5_5_LONGITUDE, LANE_HORIZONTAL_6_LATTITUDE, constants.Direction.LEFT)
@@ -122,7 +119,7 @@ def initialize_game_data():
     public_vars.walls = generate_walls()
 
     # Points
-    # public_vars.points = generate_points()
+    public_vars.points = generate_points()
 
     # Score 
     public_vars.score = 0

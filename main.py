@@ -109,8 +109,8 @@ def normal_mode():
         #     return
         public_vars.screen.fill(constants.BLACK)
         public_vars.pacman.render()
-        # for point in public_vars.points:
-        #     point.render()
+        for point in public_vars.points:
+            point.render()
         for ghost in public_vars.ghosts:
             ghost.render()
         for wall in public_vars.walls:

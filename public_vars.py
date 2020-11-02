@@ -5,7 +5,7 @@ screen = None
 score = None
 walls = None
 valid_char_locations = None
-# points = None
+points = None
 start_time = None
 
 game_mode = None

@@ -3,28 +3,27 @@ from objects import *
 from constants import *
 from init import generate_walls
 
-# class TestObject(unittest.TestCase):
+class TestOverlappable(unittest.TestCase):
 
-#     def test_overlapping(self):
-#         # x, width, y, length
-#         basic = Object(50, 50, 50, 50)
-#         obj_overlapping = Object(99, 10, 99, 10)
-#         obj_not_overlapping = Object(100, 50, 100, 50)
-#         obj_inside = Object(60, 10, 60, 10)
-#         obj_outside = Object(40, 70, 40, 70)
-#         self.assertTrue(basic.overlapping(obj_overlapping))
-#         self.assertTrue(obj_overlapping.overlapping(basic))
-#         self.assertFalse(basic.overlapping(obj_not_overlapping))
-#         self.assertFalse(obj_not_overlapping.overlapping(basic))
-#         self.assertTrue(basic.overlapping(obj_inside))
-#         self.assertTrue(obj_inside.overlapping(basic))
-#         self.assertTrue(basic.overlapping(obj_outside))
-#         self.assertTrue(obj_outside.overlapping(basic))
+    def test_overlapping(self):
+        # x, width, y, length
+        basic = Overlappable(50, 50, 50, 50)
+        obj_overlapping = Overlappable(99, 10, 99, 10)
+        obj_not_overlapping = Overlappable(100, 50, 100, 50)
+        obj_inside = Overlappable(60, 10, 60, 10)
+        obj_outside = Overlappable(40, 70, 40, 70)
+        self.assertTrue(basic.overlapping(obj_overlapping))
+        self.assertTrue(obj_overlapping.overlapping(basic))
+        self.assertFalse(basic.overlapping(obj_not_overlapping))
+        self.assertFalse(obj_not_overlapping.overlapping(basic))
+        self.assertTrue(basic.overlapping(obj_inside))
+        self.assertTrue(obj_inside.overlapping(basic))
+        self.assertTrue(basic.overlapping(obj_outside))
+        self.assertTrue(obj_outside.overlapping(basic))
 
-#         self.assertTrue(basic.overlapping_list([obj_overlapping, obj_not_overlapping, obj_inside, obj_outside]))
-#         self.assertTrue(basic.overlapping_list([obj_not_overlapping, obj_overlapping]))
-#         self.assertFalse(basic.overlapping_list([obj_not_overlapping]))
-        
+# class TestCollidable(unittest.TestCase):
+#     def test_overlaps_something(self):
+#         wall  =
 
 class TestCharacter(unittest.TestCase):
 
