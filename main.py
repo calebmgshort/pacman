@@ -23,6 +23,10 @@ def pacman_eaten():
             return True
     return False
 
+def restart_play_mode():
+    init.initialize_game_data()
+    public_vars.game_mode = constants.GameMode.PLAY
+
 def win_mode():
     public_vars.screen.fill(constants.BLACK)
     title_font = pygame.font.Font('freesansbold.ttf', 40)
@@ -50,8 +54,7 @@ def win_mode():
                     public_vars.game_mode = constants.GameMode.HOME_SCREEN
                     return
         if switch_to_play_mode:
-            init.initialize_game_data()
-            public_vars.game_mode = constants.GameMode.PLAY
+            restart_play_mode()
             return 
 
 def game_over_mode():
@@ -81,8 +84,7 @@ def game_over_mode():
                     public_vars.game_mode = constants.GameMode.HOME_SCREEN
                     return
         if switch_to_play_mode:
-            init.initialize_game_data()
-            public_vars.game_mode = constants.GameMode.PLAY
+            restart_play_mode()
             return 
 
 def pause_mode():
@@ -180,12 +182,10 @@ def home_screen_mode():
             if pygame.mouse.get_pressed()[0]:
                 switch_to_play_mode = True
         if switch_to_play_mode:
-            init.initialize_game_data()
-            public_vars.game_mode = constants.GameMode.PLAY
+            restart_play_mode()
             return 
 
 # Game loop
-init.initialize_game_data()
 public_vars.game_mode = constants.GameMode.HOME_SCREEN
 while True:
     if public_vars.game_mode == constants.GameMode.HOME_SCREEN:
