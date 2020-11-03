@@ -23,32 +23,66 @@ def pacman_eaten():
             return True
     return False
 
-def game_over_mode():
+def win_mode():
     public_vars.screen.fill(constants.BLACK)
     title_font = pygame.font.Font('freesansbold.ttf', 40)
-    title_surface = title_font.render('GAME OVER!', False, constants.RED)
+    title_surface = title_font.render('You Win! What a champion!', False, constants.GREEN)
     title_rect = title_surface.get_rect(center=(constants.SCREEN_WIDTH/2, constants.SCREEN_HEIGHT/3))
     public_vars.screen.blit(title_surface, title_rect)
+    score_surface = title_font.render('Score: {}'.format(public_vars.score), False, constants.GREEN)
+    score_rect = title_surface.get_rect(center=(constants.SCREEN_WIDTH/2, constants.SCREEN_HEIGHT/3 + 40))
+    public_vars.screen.blit(score_surface, score_rect)
     subtitle_font = pygame.font.Font('freesansbold.ttf', 20)
-    subtitle_surface = subtitle_font.render('press spacebar to play again, or q to return to the homescreen', False, constants.RED)
-    subtitle_rect = subtitle_surface.get_rect(center=(constants.SCREEN_WIDTH/2, constants.SCREEN_HEIGHT/3 + 40))
+    subtitle_surface = subtitle_font.render('press spacebar to play again, or q to return to the homescreen', False, constants.GREEN)
+    subtitle_rect = subtitle_surface.get_rect(center=(constants.SCREEN_WIDTH/2, constants.SCREEN_HEIGHT/3 + 80))
     public_vars.screen.blit(subtitle_surface, subtitle_rect)
     pygame.display.update()
     while True:
-        switch_to_normal_mode = False
+        switch_to_play_mode = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
                 return
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    switch_to_normal_mode = True
+                    switch_to_play_mode = True
                 if event.key == pygame.K_q:
                     public_vars.game_mode = constants.GameMode.HOME_SCREEN
                     return
-        if switch_to_normal_mode:
+        if switch_to_play_mode:
             init.initialize_game_data()
-            public_vars.game_mode = constants.GameMode.NORMAL
+            public_vars.game_mode = constants.GameMode.PLAY
+            return 
+
+def game_over_mode():
+    public_vars.screen.fill(constants.BLACK)
+    title_font = pygame.font.Font('freesansbold.ttf', 40)
+    title_surface = title_font.render('GAME OVER!', False, constants.RED)
+    title_rect = title_surface.get_rect(center=(constants.SCREEN_WIDTH/2, constants.SCREEN_HEIGHT/3))
+    public_vars.screen.blit(title_surface, title_rect)
+    score_surface = title_font.render('Score: {}'.format(public_vars.score), False, constants.RED)
+    score_rect = title_surface.get_rect(center=(constants.SCREEN_WIDTH/2, constants.SCREEN_HEIGHT/3 + 40))
+    public_vars.screen.blit(score_surface, score_rect)
+    subtitle_font = pygame.font.Font('freesansbold.ttf', 20)
+    subtitle_surface = subtitle_font.render('press spacebar to play again, or q to return to the homescreen', False, constants.RED)
+    subtitle_rect = subtitle_surface.get_rect(center=(constants.SCREEN_WIDTH/2, constants.SCREEN_HEIGHT/3 + 80))
+    public_vars.screen.blit(subtitle_surface, subtitle_rect)
+    pygame.display.update()
+    while True:
+        switch_to_play_mode = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
+                return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    switch_to_play_mode = True
+                if event.key == pygame.K_q:
+                    public_vars.game_mode = constants.GameMode.HOME_SCREEN
+                    return
+        if switch_to_play_mode:
+            init.initialize_game_data()
+            public_vars.game_mode = constants.GameMode.PLAY
             return 
 
 def pause_mode():
@@ -71,14 +105,14 @@ def pause_mode():
                 return
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE or event.key == pygame.K_p:
-                    public_vars.game_mode = constants.GameMode.NORMAL
+                    public_vars.game_mode = constants.GameMode.PLAY
                     return 
                 elif event.key == pygame.K_q:
                     # TODO: diplay a "are you sure you want to quit" button
                     public_vars.game_mode = constants.GameMode.HOME_SCREEN
                     return  
 
-def normal_mode():
+def play_mode():
     font = pygame.font.Font('freesansbold.ttf', 30)
     while True:
         for event in pygame.event.get():
@@ -105,8 +139,11 @@ def normal_mode():
         for ghost in public_vars.ghosts:
             ghost.move()
         if pacman_eaten():
-            # TODO: switch to game over mode. Display the score
+            # switch to game over mode. Display the score
             public_vars.game_mode = constants.GameMode.GAME_OVER
+            return
+        if len(public_vars.points) == 0:
+            public_vars.game_mode = constants.GameMode.WIN
             return
         public_vars.screen.fill(constants.BLACK)
         public_vars.pacman.render()
@@ -132,19 +169,19 @@ def home_screen_mode():
     public_vars.screen.blit(subtitle_surface, subtitle_rect)
     pygame.display.update()
     while True:
-        switch_to_normal_mode = False
+        switch_to_play_mode = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
                 return
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE or event.key == pygame.K_KP_ENTER:
-                    switch_to_normal_mode = True
+                    switch_to_play_mode = True
             if pygame.mouse.get_pressed()[0]:
-                switch_to_normal_mode = True
-        if switch_to_normal_mode:
+                switch_to_play_mode = True
+        if switch_to_play_mode:
             init.initialize_game_data()
-            public_vars.game_mode = constants.GameMode.NORMAL
+            public_vars.game_mode = constants.GameMode.PLAY
             return 
 
 # Game loop
@@ -153,10 +190,12 @@ public_vars.game_mode = constants.GameMode.HOME_SCREEN
 while True:
     if public_vars.game_mode == constants.GameMode.HOME_SCREEN:
         home_screen_mode()
-    elif public_vars.game_mode == constants.GameMode.NORMAL:
-        normal_mode()
+    elif public_vars.game_mode == constants.GameMode.PLAY:
+        play_mode()
     elif public_vars.game_mode == constants.GameMode.PAUSE:
         pause_mode()
+    elif public_vars.game_mode == constants.GameMode.WIN:
+        win_mode()
     elif public_vars.game_mode == constants.GameMode.GAME_OVER:
         game_over_mode()
     elif public_vars.game_mode == constants.GameMode.CLOSE_WINDOW:

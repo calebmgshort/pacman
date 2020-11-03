@@ -13,20 +13,21 @@ class Orientation(Enum):
 
 class GameMode(Enum):
     HOME_SCREEN = 0
-    NORMAL = 1
+    PLAY = 1
     PAUSE = 2
-    VICTORY = 3
+    WIN = 3
     GAME_OVER = 4
     CLOSE_WINDOW = 5
 
-BLACK = (0,0,0)
-BLUE = (0,0,255)
-LIGHT_PINK = (255,204,229)
-WHITE = (255,255,255)
-YELLOW = (255,255,0)
-LIGHT_GRAY = (170,170,170)
-DARK_GRAY = (100,100,100)
-RED = (255,0,0)
+BLACK = (0, 0, 0)
+BLUE = (0, 0, 255)
+LIGHT_PINK = (255, 204, 229)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+LIGHT_GRAY = (170, 170, 170)
+DARK_GRAY = (100, 100, 100)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
 
 # Default settings
 CHARACTER_SPEED = 0.2
