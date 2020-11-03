@@ -93,6 +93,9 @@ def add_point(points, x, y):
     for wall in public_vars.walls:
         if point.overlaps_something(wall):
             return
+    for super_point in public_vars.super_points:
+        if point.collides(super_point):
+            return
     points.append(point)
 
 def generate_points():
@@ -118,11 +121,15 @@ def initialize_game_data():
     # Walls
     public_vars.walls = generate_walls()
 
+    # Super points
+    public_vars.super_points = []
+    public_vars.super_points.append(SuperPoint(LANE_VERTICAL_1_LONGITUDE, LANE_HORIZONTAL_2_LATTITUDE-LANE_SIZE/2))
+    public_vars.super_points.append(SuperPoint(LANE_VERTICAL_10_LONGITUDE, LANE_HORIZONTAL_2_LATTITUDE-LANE_SIZE/2))
+    public_vars.super_points.append(SuperPoint(LANE_VERTICAL_1_LONGITUDE, LANE_HORIZONTAL_8_LATTITUDE))
+    public_vars.super_points.append(SuperPoint(LANE_VERTICAL_10_LONGITUDE, LANE_HORIZONTAL_8_LATTITUDE))
+
     # Points
     public_vars.points = generate_points()
 
     # Score 
     public_vars.score = 0
-
-    # Start time
-    public_vars.start_time = time.time()

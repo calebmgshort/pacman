@@ -89,6 +89,10 @@ class Point(Circle):
     def __init__(self, x: float, y: float):
         super().__init__(x, y, 4, constants.LIGHT_PINK)
 
+class SuperPoint(Circle):
+    def __init__(self, x: float, y: float):
+        super().__init__(x, y, 8, constants.LIGHT_PINK)
+
 class Character(Collidable):
     __metaclass__ = abc.ABCMeta
     
@@ -141,19 +145,31 @@ class Ghost(Character):
     def __init__(self, name: str, x: float, y: float, direction: constants.Direction, image_path: str, choose_destination):
         super().__init__(x, y, direction)
         self.name = name
-        initial_image = pygame.image.load(image_path)
-        self.image = pygame.transform.scale(initial_image, (round(constants.LANE_SIZE), round(constants.LANE_SIZE)))
+        self.normal_image = pygame.transform.scale(pygame.image.load(image_path), (round(constants.LANE_SIZE), round(constants.LANE_SIZE)))
+        self.scared_image = pygame.transform.scale(pygame.image.load("resources/scared.png"), (round(constants.LANE_SIZE), round(constants.LANE_SIZE)))
         self.choose_destination = choose_destination
         self.previously_on_intersection = False
+        self.mode = constants.GhostMode.NORMAL
 
     def render(self):
-        public_vars.screen.blit(self.image, (self.x-constants.LANE_SIZE/2, self.y-constants.LANE_SIZE/2))
+        render_img = None
+        if self.mode == constants.GhostMode.SCARED:
+            render_img = self.scared_image
+        else:
+            render_img = self.normal_image
+        public_vars.screen.blit(render_img, (self.x-constants.LANE_SIZE/2, self.y-constants.LANE_SIZE/2))
     
     def move(self):
         if self._on_intersection():
+            # TODO: remove this logic, which is no longer necessary
             # If we are on an intersection twice in a row, we should only choose the destination and direction once
             if not self.previously_on_intersection:
-                destination = self.choose_destination()
+                if self.mode == constants.GhostMode.NORMAL:
+                    destination = self.choose_destination()
+                elif self.mode == constants.GhostMode.SCARED:
+                    destination = Ghost.destination_run_away(self)
+                else:
+                    raise ValueError("Ghost mode is not valid")
                 self._choose_direction(destination)
             self.previously_on_intersection = True
         else:
@@ -215,6 +231,11 @@ class Ghost(Character):
         return (self.x > constants.WALL_LONGITUDE_4 and self.x < constants.WALL_LONGITUDE_6) and (
             self.y > constants.WALL_LATITUDE_5_INSIDE and self.y < constants.WALL_LATITUDE_6_INSIDE)
 
+    @staticmethod
+    def destination_run_away(myself: 'Ghost'):
+        x_dif = public_vars.pacman.x - myself.x
+        y_dif = public_vars.pacman.y - myself.y
+        return (public_vars.pacman.x - 2*x_dif, public_vars.pacman.y - y_dif)
 
 def draw_pacman_mouth(center_x: float, center_y: float, max_angle: float, direction: constants.Direction):
     # Calculate current angle.
@@ -250,13 +271,6 @@ class Pacman(Character, Circle):
     def __init__(self, x: float, y: float, direction: constants.Direction):
         Character.__init__(self, x, y, direction)
         Circle.__init__(self, x, y, constants.LANE_SIZE/2, constants.YELLOW)
-
-    def move(self):
-        super().move()
-        for point in public_vars.points:
-            if(self.collides(point)):
-                public_vars.score += 10
-                public_vars.points.remove(point)
     
     def render(self):
         Circle.render(self)

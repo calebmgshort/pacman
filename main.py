@@ -12,20 +12,24 @@ pygame.init()
 pygame.font.init()
 
 # Create the screen
-public_vars.screen = pygame.display.set_mode((constants.SCREEN_WIDTH,constants.SCREEN_HEIGHT))
+public_vars.screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
 
 # Title
 pygame.display.set_caption("Pacman")
 
-def pacman_eaten():
-    for ghost in public_vars.ghosts:
-        if public_vars.pacman.collides(ghost):
-            return True
-    return False
+def should_super_points_blink() -> bool: 
+    current_time = time.time()
+    time_dif = current_time - public_vars.start_time
+    time_dif %= 2.0
+    return time_dif < 1
+
+def resume_play_mode():
+    public_vars.start_time = time.time()
+    public_vars.game_mode = constants.GameMode.PLAY
 
 def restart_play_mode():
     init.initialize_game_data()
-    public_vars.game_mode = constants.GameMode.PLAY
+    resume_play_mode()    
 
 def win_mode():
     public_vars.screen.fill(constants.BLACK)
@@ -132,18 +136,35 @@ def play_mode():
                     public_vars.pacman.desired_direction = constants.Direction.DOWN
                 elif event.key == pygame.K_SPACE or event.key == pygame.K_p:
                     public_vars.game_mode = constants.GameMode.PAUSE
-                    return 
+                    pause_mode()
+                    if public_vars.game_mode != constants.GameMode.PLAY:
+                        return
                 elif event.key == pygame.K_q:
                     # TODO: diplay a "are you sure you want to quit" button
                     public_vars.game_mode = constants.GameMode.HOME_SCREEN
                     return 
         public_vars.pacman.move()
+        for point in public_vars.points:
+            if(public_vars.pacman.collides(point)):
+                public_vars.score += 10
+                public_vars.points.remove(point)
+        for super_point in public_vars.super_points:
+            if(public_vars.pacman.collides(super_point)):
+                public_vars.score += 40
+                public_vars.super_points.remove(super_point)
+                for ghost in public_vars.ghosts:
+                    ghost.mode = constants.GhostMode.SCARED
         for ghost in public_vars.ghosts:
             ghost.move()
-        if pacman_eaten():
-            # switch to game over mode. Display the score
-            public_vars.game_mode = constants.GameMode.GAME_OVER
-            return
+        for ghost in public_vars.ghosts:
+            if public_vars.pacman.collides(ghost):
+                if ghost.mode == constants.GhostMode.SCARED:
+                    public_vars.score += 100
+                    ghost.x, ghost.y = LANE_VERTICAL_5_5_LONGITUDE, LANE_HORIZONTAL_5_LATTITUDE
+                    ghost.mode = constants.GhostMode.NORMAL
+                else:
+                    public_vars.game_mode = constants.GameMode.GAME_OVER
+                    return
         if len(public_vars.points) == 0:
             public_vars.game_mode = constants.GameMode.WIN
             return
@@ -151,6 +172,9 @@ def play_mode():
         public_vars.pacman.render()
         for point in public_vars.points:
             point.render()
+        if should_super_points_blink():
+            for super_point in public_vars.super_points:
+                super_point.render()
         for ghost in public_vars.ghosts:
             ghost.render()
         for wall in public_vars.walls:
@@ -192,8 +216,6 @@ while True:
         home_screen_mode()
     elif public_vars.game_mode == constants.GameMode.PLAY:
         play_mode()
-    elif public_vars.game_mode == constants.GameMode.PAUSE:
-        pause_mode()
     elif public_vars.game_mode == constants.GameMode.WIN:
         win_mode()
     elif public_vars.game_mode == constants.GameMode.GAME_OVER:
