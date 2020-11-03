@@ -160,11 +160,14 @@ def play_mode():
             if public_vars.pacman.collides(ghost):
                 if ghost.mode == constants.GhostMode.SCARED:
                     public_vars.score += 100
-                    ghost.x, ghost.y = LANE_VERTICAL_5_5_LONGITUDE, LANE_HORIZONTAL_5_LATTITUDE
-                    ghost.mode = constants.GhostMode.NORMAL
+                    ghost.mode = constants.GhostMode.RESPAWN
+                elif ghost.mode == constants.GhostMode.RESPAWN:
+                    pass
                 else:
                     public_vars.game_mode = constants.GameMode.GAME_OVER
                     return
+            if ghost.in_center():
+                ghost.mode = constants.GhostMode.NORMAL
         if len(public_vars.points) == 0:
             public_vars.game_mode = constants.GameMode.WIN
             return

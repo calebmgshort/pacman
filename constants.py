@@ -22,6 +22,7 @@ class GameMode(Enum):
 class GhostMode(Enum):
     NORMAL = 0
     SCARED = 1
+    RESPAWN = 2
 
 BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)

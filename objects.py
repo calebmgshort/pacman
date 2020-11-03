@@ -147,17 +147,18 @@ class Ghost(Character):
         self.name = name
         self.normal_image = pygame.transform.scale(pygame.image.load(image_path), (round(constants.LANE_SIZE), round(constants.LANE_SIZE)))
         self.scared_image = pygame.transform.scale(pygame.image.load("resources/scared.png"), (round(constants.LANE_SIZE), round(constants.LANE_SIZE)))
+        self.respawn_image = pygame.transform.scale(pygame.image.load("resources/respawn.png"), (round(constants.LANE_SIZE), round(constants.LANE_SIZE/2)))
         self.choose_destination = choose_destination
         self.previously_on_intersection = False
         self.mode = constants.GhostMode.NORMAL
 
     def render(self):
-        render_img = None
         if self.mode == constants.GhostMode.SCARED:
-            render_img = self.scared_image
+            public_vars.screen.blit(self.scared_image, (self.x-constants.LANE_SIZE/2, self.y-constants.LANE_SIZE/2))
+        elif self.mode == constants.GhostMode.RESPAWN:
+            public_vars.screen.blit(self.respawn_image, (self.x-constants.LANE_SIZE/2, self.y-constants.LANE_SIZE/2))
         else:
-            render_img = self.normal_image
-        public_vars.screen.blit(render_img, (self.x-constants.LANE_SIZE/2, self.y-constants.LANE_SIZE/2))
+            public_vars.screen.blit(self.normal_image, (self.x-constants.LANE_SIZE/2, self.y-constants.LANE_SIZE/2))
     
     def move(self):
         if self._on_intersection():
@@ -168,6 +169,8 @@ class Ghost(Character):
                     destination = self.choose_destination()
                 elif self.mode == constants.GhostMode.SCARED:
                     destination = Ghost.destination_run_away(self)
+                elif self.mode == constants.GhostMode.RESPAWN:
+                    destination = Ghost.destination_respawn(self)
                 else:
                     raise ValueError("Ghost mode is not valid")
                 self._choose_direction(destination)
@@ -206,7 +209,7 @@ class Ghost(Character):
         if len(valid_directions) == 1:
             self.desired_direction = valid_directions.pop()
         elif len(valid_directions) > 1:
-            if self._in_center():
+            if self.in_center():
                 self.desired_direction = constants.Direction.UP
                 return
             best_distance = constants.SCREEN_WIDTH + constants.SCREEN_HEIGHT
@@ -217,7 +220,7 @@ class Ghost(Character):
                 try:
                     distance = util.distance((self.x, self.y), destination)
                 except TypeError:
-                    print("Name: {}, Pos: ({},{}), __in_center: {}, _on_intersection: {}".format(self.name, self.x, self.y, self._in_center(), self._on_intersection()))
+                    print("Name: {}, Pos: ({},{}), in_center: {}, _on_intersection: {}".format(self.name, self.x, self.y, self.in_center(), self._on_intersection()))
                     raise TypeError("Distance called with invalid value")
                 if distance < best_distance:
                     best_distance = distance
@@ -227,7 +230,7 @@ class Ghost(Character):
         else:
             self.desired_direction = util.opposite_direction(self.direction)
     
-    def _in_center(self) -> bool:
+    def in_center(self) -> bool:
         return (self.x > constants.WALL_LONGITUDE_4 and self.x < constants.WALL_LONGITUDE_6) and (
             self.y > constants.WALL_LATITUDE_5_INSIDE and self.y < constants.WALL_LATITUDE_6_INSIDE)
 
@@ -236,6 +239,11 @@ class Ghost(Character):
         x_dif = public_vars.pacman.x - myself.x
         y_dif = public_vars.pacman.y - myself.y
         return (public_vars.pacman.x - 2*x_dif, public_vars.pacman.y - y_dif)
+    
+    @staticmethod
+    def destination_respawn(myself: 'Ghost'):
+        return (constants.LANE_VERTICAL_5_5_LONGITUDE, constants.LANE_HORIZONTAL_5_LATTITUDE)
+
 
 def draw_pacman_mouth(center_x: float, center_y: float, max_angle: float, direction: constants.Direction):
     # Calculate current angle.

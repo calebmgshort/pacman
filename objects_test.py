@@ -74,10 +74,10 @@ class TestGhost(unittest.TestCase):
 
     def test_in_center(self):
         green = Ghost("green", constants.SCREEN_WIDTH//2+constants.LANE_SIZE//2, constants.SCREEN_HEIGHT//2-constants.LANE_SIZE//2, constants.Direction.LEFT, "resources/green.png", lambda: (0,constants.SCREEN_HEIGHT))
-        self.assertTrue(green._in_center())
+        self.assertTrue(green.in_center())
         green.x = 50
         green.y = 50
-        self.assertFalse(green._in_center())
+        self.assertFalse(green.in_center())
 
     def test_dead_end(self):
         green = Ghost("green", constants.LANE_VERTICAL_1_LONGITUDE, constants.LANE_HORIZONTAL_1_LATTITUDE, constants.Direction.LEFT, "resources/green.png", lambda: (0,constants.SCREEN_HEIGHT))
