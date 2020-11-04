@@ -1,7 +1,7 @@
 import pygame
 import constants
 import public_vars
-import objects
+from objects import *
 import init
 import time
 from ghost_algorithms import *
@@ -19,17 +19,13 @@ pygame.display.set_caption("Pacman")
 
 def should_super_points_blink() -> bool: 
     current_time = time.time()
-    time_dif = current_time - public_vars.start_time
+    time_dif = current_time - public_vars.render_start_time
     time_dif %= 2.0
     return time_dif < 1
 
-def resume_play_mode():
-    public_vars.start_time = time.time()
-    public_vars.game_mode = constants.GameMode.PLAY
-
 def restart_play_mode():
     init.initialize_game_data()
-    resume_play_mode()    
+    public_vars.game_mode = constants.GameMode.PLAY
 
 def win_mode():
     public_vars.screen.fill(constants.BLACK)
@@ -118,8 +114,23 @@ def pause_mode():
                     public_vars.game_mode = constants.GameMode.HOME_SCREEN
                     return  
 
+def calculate_and_switch_ghost_mode(ghost: Ghost, start_scared_mode_time: float, total_pause_mode_time: float):
+    if ghost.mode != Ghost.GhostMode.SCARED:
+        return
+    total_scared_time = time.time() - start_scared_mode_time - total_pause_mode_time
+    if total_scared_time > 10: 
+        ghost.set_submode(Ghost.GhostSubmode.NORMAL)
+        ghost.mode = Ghost.GhostMode.NORMAL
+        return
+    if total_scared_time > 7:
+        ghost.set_submode(Ghost.GhostSubmode.ABOUT_TO_SWITCH)
+
 def play_mode():
     font = pygame.font.Font('freesansbold.ttf', 30)
+    public_vars.render_start_time = time.time()
+    total_pause_mode_time = 0
+    start_scared_mode_time = None
+    # ghost_mode_scared = False
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -136,13 +147,17 @@ def play_mode():
                     public_vars.pacman.desired_direction = constants.Direction.DOWN
                 elif event.key == pygame.K_SPACE or event.key == pygame.K_p:
                     public_vars.game_mode = constants.GameMode.PAUSE
+                    last_pause_mode = time.time()
                     pause_mode()
+                    pause_mode_time = time.time() - last_pause_mode
+                    total_pause_mode_time += pause_mode_time
                     if public_vars.game_mode != constants.GameMode.PLAY:
                         return
                 elif event.key == pygame.K_q:
                     # TODO: diplay a "are you sure you want to quit" button
                     public_vars.game_mode = constants.GameMode.HOME_SCREEN
                     return 
+        
         public_vars.pacman.move()
         for point in public_vars.points:
             if(public_vars.pacman.collides(point)):
@@ -153,21 +168,30 @@ def play_mode():
                 public_vars.score += 40
                 public_vars.super_points.remove(super_point)
                 for ghost in public_vars.ghosts:
-                    ghost.mode = constants.GhostMode.SCARED
+                    ghost.mode = Ghost.GhostMode.SCARED
+                total_pause_mode_time = 0
+                start_scared_mode_time = time.time()
+                # ghost_mode_scared = True
+        # if ghost_mode_scared:
+        #     for ghost_mode_scared in public_vars.ghosts:
+        #         if ghost.mode == Ghost.GhostMode.SCARED:
+        #             break
+        #     ghost_mode_scared = False
+
         for ghost in public_vars.ghosts:
             ghost.move()
-        for ghost in public_vars.ghosts:
+            calculate_and_switch_ghost_mode(ghost, start_scared_mode_time, total_pause_mode_time)
             if public_vars.pacman.collides(ghost):
-                if ghost.mode == constants.GhostMode.SCARED:
+                if ghost.mode == Ghost.GhostMode.SCARED:
                     public_vars.score += 100
-                    ghost.mode = constants.GhostMode.RESPAWN
-                elif ghost.mode == constants.GhostMode.RESPAWN:
+                    ghost.mode = Ghost.GhostMode.RESPAWN
+                elif ghost.mode == Ghost.GhostMode.RESPAWN:
                     pass
                 else:
                     public_vars.game_mode = constants.GameMode.GAME_OVER
                     return
             if ghost.in_center():
-                ghost.mode = constants.GhostMode.NORMAL
+                ghost.mode = Ghost.GhostMode.NORMAL
         if len(public_vars.points) == 0:
             public_vars.game_mode = constants.GameMode.WIN
             return

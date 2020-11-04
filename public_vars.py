@@ -7,6 +7,7 @@ walls = None
 valid_char_locations = None
 points = None
 super_points = None
+
 start_time = None
 
 game_mode = None

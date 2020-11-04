@@ -19,11 +19,6 @@ class GameMode(Enum):
     GAME_OVER = 4
     CLOSE_WINDOW = 5
 
-class GhostMode(Enum):
-    NORMAL = 0
-    SCARED = 1
-    RESPAWN = 2
-
 BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 LIGHT_PINK = (255, 204, 229)

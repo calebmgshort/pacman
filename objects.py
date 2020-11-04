@@ -8,6 +8,7 @@ import math
 import time
 from valid_character_locations import ValidCharacterLocations
 from typing import Tuple
+from enum import Enum
 
 
 class Overlappable:
@@ -142,20 +143,52 @@ class Character(Collidable):
             raise Exception("Move (end): character in invalid location")
 
 class Ghost(Character):
+
+    class GhostMode(Enum):
+        NORMAL = 0
+        SCARED = 1
+        RESPAWN = 2
+
+    class GhostSubmode(Enum):
+        NORMAL = 0
+        ABOUT_TO_SWITCH = 1
+
     def __init__(self, name: str, x: float, y: float, direction: constants.Direction, image_path: str, choose_destination):
         super().__init__(x, y, direction)
         self.name = name
         self.normal_image = pygame.transform.scale(pygame.image.load(image_path), (round(constants.LANE_SIZE), round(constants.LANE_SIZE)))
         self.scared_image = pygame.transform.scale(pygame.image.load("resources/scared.png"), (round(constants.LANE_SIZE), round(constants.LANE_SIZE)))
+        self.scared_changing_image = pygame.transform.scale(pygame.image.load("resources/scared_changing.png"), (round(constants.LANE_SIZE), round(constants.LANE_SIZE)))
         self.respawn_image = pygame.transform.scale(pygame.image.load("resources/respawn.png"), (round(constants.LANE_SIZE), round(constants.LANE_SIZE/2)))
         self.choose_destination = choose_destination
         self.previously_on_intersection = False
-        self.mode = constants.GhostMode.NORMAL
+        self.mode = Ghost.GhostMode.NORMAL
+        self.submode = Ghost.GhostSubmode.NORMAL
+
+    def set_submode(self, submode: "Ghost.GhostSubmode"):
+        if self.mode == Ghost.GhostMode.SCARED:
+            if submode != Ghost.GhostSubmode.ABOUT_TO_SWITCH and submode != Ghost.GhostSubmode.NORMAL:
+                raise ValueError("Ghost submode invalid")
+            self.submode = submode
+            return
+        raise ValueError("Ghost submode can not be set within a ghost mode other than Scared")
 
     def render(self):
-        if self.mode == constants.GhostMode.SCARED:
-            public_vars.screen.blit(self.scared_image, (self.x-constants.LANE_SIZE/2, self.y-constants.LANE_SIZE/2))
-        elif self.mode == constants.GhostMode.RESPAWN:
+        if self.mode == Ghost.GhostMode.SCARED:
+            if self.submode == Ghost.GhostSubmode.NORMAL:
+                public_vars.screen.blit(self.scared_image, (self.x-constants.LANE_SIZE/2, self.y-constants.LANE_SIZE/2))
+            elif self.submode == Ghost.GhostSubmode.ABOUT_TO_SWITCH:
+                current_time = time.time()
+                time_dif = current_time - public_vars.render_start_time
+                time_dif %= 1
+                if time_dif < 0.5:
+                    public_vars.screen.blit(self.scared_image, (self.x-constants.LANE_SIZE/2, self.y-constants.LANE_SIZE/2))
+                else: 
+                    public_vars.screen.blit(self.scared_changing_image, (self.x-constants.LANE_SIZE/2, self.y-constants.LANE_SIZE/2))
+                pass
+            else:
+                raise ValueError("Ghost submode not valid")
+        elif self.mode == Ghost.GhostMode.RESPAWN:
             public_vars.screen.blit(self.respawn_image, (self.x-constants.LANE_SIZE/2, self.y-constants.LANE_SIZE/2))
         else:
             public_vars.screen.blit(self.normal_image, (self.x-constants.LANE_SIZE/2, self.y-constants.LANE_SIZE/2))
@@ -165,11 +198,11 @@ class Ghost(Character):
             # TODO: remove this logic, which is no longer necessary
             # If we are on an intersection twice in a row, we should only choose the destination and direction once
             if not self.previously_on_intersection:
-                if self.mode == constants.GhostMode.NORMAL:
+                if self.mode == Ghost.GhostMode.NORMAL:
                     destination = self.choose_destination()
-                elif self.mode == constants.GhostMode.SCARED:
+                elif self.mode == Ghost.GhostMode.SCARED:
                     destination = Ghost.destination_run_away(self)
-                elif self.mode == constants.GhostMode.RESPAWN:
+                elif self.mode == Ghost.GhostMode.RESPAWN:
                     destination = Ghost.destination_respawn(self)
                 else:
                     raise ValueError("Ghost mode is not valid")
@@ -250,7 +283,7 @@ def draw_pacman_mouth(center_x: float, center_y: float, max_angle: float, direct
     angle = 0
 
     current_time = time.time()
-    time_dif = current_time - public_vars.start_time
+    time_dif = current_time - public_vars.render_start_time
     time_dif %= 1
     if time_dif - 0.5 < 0:
         angle = max_angle - max_angle*time_dif*2
