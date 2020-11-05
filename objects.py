@@ -9,6 +9,7 @@ import time
 from valid_character_locations import ValidCharacterLocations
 from typing import Tuple
 from enum import Enum
+from random import random
 
 
 class Overlappable:
@@ -276,6 +277,42 @@ class Ghost(Character):
     @staticmethod
     def destination_respawn(myself: 'Ghost'):
         return (constants.LANE_VERTICAL_5_5_LONGITUDE, constants.LANE_HORIZONTAL_5_LATTITUDE)
+    
+    # Red hunts. Goes straight for pacman
+    @staticmethod
+    def destination_red():
+        return (public_vars.pacman.x, public_vars.pacman.y)
+
+    # Pink ambushes. Goes 4 lanes in head of pacman
+    @staticmethod
+    def destination_pink():
+        if public_vars.pacman.direction == constants.Direction.RIGHT:
+            return (public_vars.pacman.x + 4 * constants.LANE_SIZE, public_vars.pacman.y)
+        elif public_vars.pacman.direction == constants.Direction.LEFT:
+            return (public_vars.pacman.x - 4 * constants.LANE_SIZE, public_vars.pacman.y)
+        elif public_vars.pacman.direction == constants.Direction.UP:
+            return (public_vars.pacman.x, public_vars.pacman.y - 4*constants.LANE_SIZE)
+        elif public_vars.pacman.direction == constants.Direction.DOWN:
+            return (public_vars.pacman.x, public_vars.pacman.y + 4*constants.LANE_SIZE)
+        else:
+            raise ValueError("The direction provided is not valid")
+        raise ValueError("This statement should never be reached! And the direction provided is not valid")
+
+    # Green goes to the point accross pacman from red
+    @staticmethod
+    def destination_green():
+        x_dif = public_vars.pacman.x - public_vars.red_ghost.x
+        y_dif = public_vars.pacman.y - public_vars.red_ghost.y
+        return (public_vars.pacman.x + x_dif, public_vars.pacman.y + y_dif)
+
+    # Orange hunts like red, unless it's too close, in which case it picks a random spot. 
+    @staticmethod
+    def destination_orange():
+        if util.distance((public_vars.orange_ghost.x, public_vars.orange_ghost.y), (public_vars.pacman.x, public_vars.pacman.y)) > 4 * constants.LANE_SIZE * math.sqrt(2):
+            return Ghost.destination_red()
+        return (random() * constants.SCREEN_WIDTH, random() * constants.SCREEN_HEIGHT)
+
+
 
 
 def draw_pacman_mouth(center_x: float, center_y: float, max_angle: float, direction: constants.Direction):

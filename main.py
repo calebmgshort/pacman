@@ -183,7 +183,7 @@ def play_mode():
     # Start loop
     while True:
         # Sleep so everything doesn't happen too fast
-        time.sleep(0.0004)
+        time.sleep(0.0005)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
