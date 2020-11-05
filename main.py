@@ -5,6 +5,7 @@ from objects import *
 import init
 import time
 from ghost_algorithms import *
+import threading 
 
 # Initialize pygame
 pygame.init()
@@ -125,24 +126,42 @@ def calculate_and_switch_ghost_mode(ghost: Ghost, start_scared_mode_time: float,
     if total_scared_time > 7:
         ghost.set_submode(Ghost.GhostSubmode.ABOUT_TO_SWITCH)
 
-def play_mode_render(font):
-    public_vars.screen.fill(constants.BLACK)
-    public_vars.pacman.render()
-    for point in public_vars.points:
-        point.render()
-    if should_super_points_blink():
-        for super_point in public_vars.super_points:
-            super_point.render()
-    for ghost in public_vars.ghosts:
-        ghost.render()
-    for wall in public_vars.walls:
-        wall.render()
-    textsurface = font.render('Score: {}'.format(public_vars.score), True, constants.WHITE)
-    public_vars.screen.blit(textsurface, (constants.SCREEN_WIDTH/2,0))
-    pygame.display.update()
+class StopThread:
+    def __init__(self):
+        self.should_stop = False
+
+def play_mode_render(stop_render: StopThread):
+    font = pygame.font.Font('freesansbold.ttf', 30)
+    while True:
+        time.sleep(0.020)
+        if stop_render.should_stop:
+            return
+        if public_vars.game_mode != constants.GameMode.PLAY:
+            continue
+        public_vars.screen.fill(constants.BLACK)
+        public_vars.pacman.render()
+        for point in public_vars.points:
+            point.render()
+        if should_super_points_blink():
+            for super_point in public_vars.super_points:
+                super_point.render()
+        for ghost in public_vars.ghosts:
+            ghost.render()
+        for wall in public_vars.walls:
+            wall.render()
+        textsurface = font.render('Score: {}'.format(public_vars.score), True, constants.WHITE)
+        public_vars.screen.blit(textsurface, (constants.SCREEN_WIDTH/2,0))
+        pygame.display.update()
+
+def stop_thread(thread: threading.Thread, thread_stopper: StopThread):
+    thread_stopper.should_stop = True
+    thread.join()
+
 
 def play_mode():
-    font = pygame.font.Font('freesansbold.ttf', 30)
+    stop_render = StopThread()
+    play_mode_render_thread = threading.Thread(target=play_mode_render, args=(stop_render,)) 
+    play_mode_render_thread.start()
     public_vars.render_start_time = time.time()
     total_pause_mode_time = 0
     start_scared_mode_time = None
@@ -154,8 +173,8 @@ def play_mode():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
+                stop_thread(play_mode_render_thread, stop_render)
                 return
-        play_mode_render(font)
     chomp_sound = mixer.Sound('resources/sounds/pacman_chomp_short.wav')
     chomp_sound_channel = pygame.mixer.Channel(0)
     eat_ghost_sound = mixer.Sound('resources/sounds/pacman_eatghost.wav')
@@ -163,9 +182,12 @@ def play_mode():
     sound_channels = [chomp_sound_channel, eat_ghost_sound_channel]
     # Start loop
     while True:
+        # Sleep so everything doesn't happen too fast
+        time.sleep(0.0004)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
+                stop_thread(play_mode_render_thread, stop_render)
                 return
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
@@ -185,12 +207,14 @@ def play_mode():
                     pause_mode_time = time.time() - last_pause_mode
                     total_pause_mode_time += pause_mode_time
                     if public_vars.game_mode != constants.GameMode.PLAY:
+                        stop_thread(play_mode_render_thread, stop_render)
                         return
                     for sound_channel in sound_channels:
                         sound_channel.unpause()
                 elif event.key == pygame.K_q:
                     # TODO: diplay a "are you sure you want to quit" button
                     public_vars.game_mode = constants.GameMode.HOME_SCREEN
+                    stop_thread(play_mode_render_thread, stop_render)
                     return 
         public_vars.pacman.move()
         for point in public_vars.points:
@@ -222,12 +246,14 @@ def play_mode():
                 elif ghost.mode == Ghost.GhostMode.RESPAWN:
                     pass
                 else:
+                    stop_thread(play_mode_render_thread, stop_render)
                     death_sound = mixer.Sound('resources/sounds/pacman_death.wav')
                     death_sound_channel = death_sound.play()
                     while(death_sound_channel.get_busy()):
                         for event in pygame.event.get():
                             if event.type == pygame.QUIT:
                                 public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
+                                stop_thread(play_mode_render_thread, stop_render)
                                 return
                     public_vars.game_mode = constants.GameMode.GAME_OVER
                     return
@@ -235,8 +261,8 @@ def play_mode():
                 ghost.mode = Ghost.GhostMode.NORMAL
         if len(public_vars.points) == 0:
             public_vars.game_mode = constants.GameMode.WIN
+            stop_thread(play_mode_render_thread, stop_render)
             return
-        play_mode_render(font)
 
 def home_screen_mode():
     public_vars.screen.fill(constants.BLACK)
