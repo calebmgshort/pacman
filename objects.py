@@ -157,9 +157,9 @@ class Ghost(Character):
         super().__init__(x, y, direction)
         self.name = name
         self.normal_image = pygame.transform.scale(pygame.image.load(image_path), (round(constants.LANE_SIZE), round(constants.LANE_SIZE)))
-        self.scared_image = pygame.transform.scale(pygame.image.load("resources/scared.png"), (round(constants.LANE_SIZE), round(constants.LANE_SIZE)))
-        self.scared_changing_image = pygame.transform.scale(pygame.image.load("resources/scared_changing.png"), (round(constants.LANE_SIZE), round(constants.LANE_SIZE)))
-        self.respawn_image = pygame.transform.scale(pygame.image.load("resources/respawn.png"), (round(constants.LANE_SIZE), round(constants.LANE_SIZE/2)))
+        self.scared_image = pygame.transform.scale(pygame.image.load("resources/images/scared.png"), (round(constants.LANE_SIZE), round(constants.LANE_SIZE)))
+        self.scared_changing_image = pygame.transform.scale(pygame.image.load("resources/images/scared_changing.png"), (round(constants.LANE_SIZE), round(constants.LANE_SIZE)))
+        self.respawn_image = pygame.transform.scale(pygame.image.load("resources/images/respawn.png"), (round(constants.LANE_SIZE), round(constants.LANE_SIZE/2)))
         self.choose_destination = choose_destination
         self.previously_on_intersection = False
         self.mode = Ghost.GhostMode.NORMAL

@@ -112,10 +112,10 @@ def generate_points():
 
 def initialize_game_data():
     public_vars.pacman = Pacman(LANE_VERTICAL_5_5_LONGITUDE, LANE_HORIZONTAL_6_LATTITUDE, constants.Direction.LEFT)
-    public_vars.red_ghost = Ghost("red", LANE_VERTICAL_5_5_LONGITUDE, LANE_HORIZONTAL_4_LATTITUDE, constants.Direction.UP, "resources/red.png", destination_red)
-    public_vars.green_ghost = Ghost("green", LANE_VERTICAL_5_5_LONGITUDE+LANE_SIZE, LANE_HORIZONTAL_5_LATTITUDE, constants.Direction.LEFT, "resources/green.png", destination_green)
-    public_vars.pink_ghost = Ghost("pink", LANE_VERTICAL_5_5_LONGITUDE-LANE_SIZE, LANE_HORIZONTAL_5_LATTITUDE, constants.Direction.RIGHT, "resources/pink.png", destination_pink)
-    public_vars.orange_ghost = Ghost("orange", LANE_VERTICAL_5_5_LONGITUDE, LANE_HORIZONTAL_5_LATTITUDE, constants.Direction.UP, "resources/orange.png", destination_orange)
+    public_vars.red_ghost = Ghost("red", LANE_VERTICAL_5_5_LONGITUDE, LANE_HORIZONTAL_4_LATTITUDE, constants.Direction.UP, "resources/images/red.png", destination_red)
+    public_vars.green_ghost = Ghost("green", LANE_VERTICAL_5_5_LONGITUDE+LANE_SIZE, LANE_HORIZONTAL_5_LATTITUDE, constants.Direction.LEFT, "resources/images/green.png", destination_green)
+    public_vars.pink_ghost = Ghost("pink", LANE_VERTICAL_5_5_LONGITUDE-LANE_SIZE, LANE_HORIZONTAL_5_LATTITUDE, constants.Direction.RIGHT, "resources/images/pink.png", destination_pink)
+    public_vars.orange_ghost = Ghost("orange", LANE_VERTICAL_5_5_LONGITUDE, LANE_HORIZONTAL_5_LATTITUDE, constants.Direction.UP, "resources/images/orange.png", destination_orange)
     public_vars.ghosts = [public_vars.red_ghost, public_vars.green_ghost, public_vars.pink_ghost, public_vars.orange_ghost]
 
     # Walls

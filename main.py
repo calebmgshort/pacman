@@ -125,12 +125,43 @@ def calculate_and_switch_ghost_mode(ghost: Ghost, start_scared_mode_time: float,
     if total_scared_time > 7:
         ghost.set_submode(Ghost.GhostSubmode.ABOUT_TO_SWITCH)
 
+def play_mode_render(font):
+    public_vars.screen.fill(constants.BLACK)
+    public_vars.pacman.render()
+    for point in public_vars.points:
+        point.render()
+    if should_super_points_blink():
+        for super_point in public_vars.super_points:
+            super_point.render()
+    for ghost in public_vars.ghosts:
+        ghost.render()
+    for wall in public_vars.walls:
+        wall.render()
+    textsurface = font.render('Score: {}'.format(public_vars.score), True, constants.WHITE)
+    public_vars.screen.blit(textsurface, (constants.SCREEN_WIDTH/2,0))
+    pygame.display.update()
+
 def play_mode():
     font = pygame.font.Font('freesansbold.ttf', 30)
     public_vars.render_start_time = time.time()
     total_pause_mode_time = 0
     start_scared_mode_time = None
-    # ghost_mode_scared = False
+    # Play initial sound
+    mixer = pygame.mixer
+    beginning_sound = mixer.Sound('resources/sounds/pacman_beginning.wav')
+    beginning_sound_channel = beginning_sound.play()
+    while(beginning_sound_channel.get_busy()):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
+                return
+        play_mode_render(font)
+    chomp_sound = mixer.Sound('resources/sounds/pacman_chomp_short.wav')
+    chomp_sound_channel = pygame.mixer.Channel(0)
+    eat_ghost_sound = mixer.Sound('resources/sounds/pacman_eatghost.wav')
+    eat_ghost_sound_channel = pygame.mixer.Channel(1)
+    sound_channels = [chomp_sound_channel, eat_ghost_sound_channel]
+    # Start loop
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -146,6 +177,8 @@ def play_mode():
                 elif event.key == pygame.K_DOWN:
                     public_vars.pacman.desired_direction = constants.Direction.DOWN
                 elif event.key == pygame.K_SPACE or event.key == pygame.K_p:
+                    for sound_channel in sound_channels:
+                        sound_channel.pause()
                     public_vars.game_mode = constants.GameMode.PAUSE
                     last_pause_mode = time.time()
                     pause_mode()
@@ -153,16 +186,21 @@ def play_mode():
                     total_pause_mode_time += pause_mode_time
                     if public_vars.game_mode != constants.GameMode.PLAY:
                         return
+                    for sound_channel in sound_channels:
+                        sound_channel.unpause()
                 elif event.key == pygame.K_q:
                     # TODO: diplay a "are you sure you want to quit" button
                     public_vars.game_mode = constants.GameMode.HOME_SCREEN
                     return 
-        
         public_vars.pacman.move()
         for point in public_vars.points:
             if(public_vars.pacman.collides(point)):
                 public_vars.score += 10
                 public_vars.points.remove(point)
+                if chomp_sound_channel.get_busy():
+                    chomp_sound_channel.queue(chomp_sound)
+                else:
+                    chomp_sound_channel.play(chomp_sound)    
         for super_point in public_vars.super_points:
             if(public_vars.pacman.collides(super_point)):
                 public_vars.score += 40
@@ -171,13 +209,6 @@ def play_mode():
                     ghost.mode = Ghost.GhostMode.SCARED
                 total_pause_mode_time = 0
                 start_scared_mode_time = time.time()
-                # ghost_mode_scared = True
-        # if ghost_mode_scared:
-        #     for ghost_mode_scared in public_vars.ghosts:
-        #         if ghost.mode == Ghost.GhostMode.SCARED:
-        #             break
-        #     ghost_mode_scared = False
-
         for ghost in public_vars.ghosts:
             ghost.move()
             calculate_and_switch_ghost_mode(ghost, start_scared_mode_time, total_pause_mode_time)
@@ -185,9 +216,19 @@ def play_mode():
                 if ghost.mode == Ghost.GhostMode.SCARED:
                     public_vars.score += 100
                     ghost.mode = Ghost.GhostMode.RESPAWN
+                    if eat_ghost_sound_channel.get_busy():
+                        eat_ghost_sound_channel.stop()
+                    eat_ghost_sound_channel.play(eat_ghost_sound)    
                 elif ghost.mode == Ghost.GhostMode.RESPAWN:
                     pass
                 else:
+                    death_sound = mixer.Sound('resources/sounds/pacman_death.wav')
+                    death_sound_channel = death_sound.play()
+                    while(death_sound_channel.get_busy()):
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
+                                return
                     public_vars.game_mode = constants.GameMode.GAME_OVER
                     return
             if ghost.in_center():
@@ -195,20 +236,7 @@ def play_mode():
         if len(public_vars.points) == 0:
             public_vars.game_mode = constants.GameMode.WIN
             return
-        public_vars.screen.fill(constants.BLACK)
-        public_vars.pacman.render()
-        for point in public_vars.points:
-            point.render()
-        if should_super_points_blink():
-            for super_point in public_vars.super_points:
-                super_point.render()
-        for ghost in public_vars.ghosts:
-            ghost.render()
-        for wall in public_vars.walls:
-            wall.render()
-        textsurface = font.render('Score: {}'.format(public_vars.score), True, constants.WHITE)
-        public_vars.screen.blit(textsurface, (constants.SCREEN_WIDTH/2,0))
-        pygame.display.update()
+        play_mode_render(font)
 
 def home_screen_mode():
     public_vars.screen.fill(constants.BLACK)

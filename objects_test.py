@@ -73,25 +73,25 @@ class TestCharacter(unittest.TestCase):
 class TestGhost(unittest.TestCase):
 
     def test_in_center(self):
-        green = Ghost("green", constants.SCREEN_WIDTH//2+constants.LANE_SIZE//2, constants.SCREEN_HEIGHT//2-constants.LANE_SIZE//2, constants.Direction.LEFT, "resources/green.png", lambda: (0,constants.SCREEN_HEIGHT))
+        green = Ghost("green", constants.SCREEN_WIDTH//2+constants.LANE_SIZE//2, constants.SCREEN_HEIGHT//2-constants.LANE_SIZE//2, constants.Direction.LEFT, "resources/images/green.png", lambda: (0,constants.SCREEN_HEIGHT))
         self.assertTrue(green.in_center())
         green.x = 50
         green.y = 50
         self.assertFalse(green.in_center())
 
     def test_dead_end(self):
-        green = Ghost("green", constants.LANE_VERTICAL_1_LONGITUDE, constants.LANE_HORIZONTAL_1_LATTITUDE, constants.Direction.LEFT, "resources/green.png", lambda: (0,constants.SCREEN_HEIGHT))
+        green = Ghost("green", constants.LANE_VERTICAL_1_LONGITUDE, constants.LANE_HORIZONTAL_1_LATTITUDE, constants.Direction.LEFT, "resources/images/green.png", lambda: (0,constants.SCREEN_HEIGHT))
         self.assertTrue(green._dead_end())
         green.x += 0.1
         self.assertFalse(green._dead_end())
     
     def test_on_intersection(self):
-        red = Ghost("red", constants.LANE_VERTICAL_1_LONGITUDE, constants.LANE_HORIZONTAL_2_LATTITUDE, constants.Direction.DOWN, "resources/red.png", lambda: (0,0))
+        red = Ghost("red", constants.LANE_VERTICAL_1_LONGITUDE, constants.LANE_HORIZONTAL_2_LATTITUDE, constants.Direction.DOWN, "resources/images/red.png", lambda: (0,0))
         self.assertTrue(red._on_intersection())
         
     def test_choose_direction(self):
         # Upper left corner, moving up. Should go right
-        green = Ghost("green", constants.LANE_VERTICAL_1_LONGITUDE, constants.LANE_HORIZONTAL_1_LATTITUDE, constants.Direction.UP, "resources/green.png", lambda: (0,constants.SCREEN_HEIGHT))
+        green = Ghost("green", constants.LANE_VERTICAL_1_LONGITUDE, constants.LANE_HORIZONTAL_1_LATTITUDE, constants.Direction.UP, "resources/images/green.png", lambda: (0,constants.SCREEN_HEIGHT))
         self.assertEqual(constants.Direction.UP, green.desired_direction)
         green._choose_direction(green.choose_destination())
         self.assertEqual(constants.Direction.RIGHT, green.desired_direction)
@@ -106,7 +106,7 @@ class TestGhost(unittest.TestCase):
         green._choose_direction(green.choose_destination())
         self.assertEqual(constants.Direction.LEFT, green.desired_direction)
         # In the upper left corner, down one spot. heading down. Should go right
-        red = Ghost("red", constants.LANE_VERTICAL_1_LONGITUDE, constants.LANE_HORIZONTAL_2_LATTITUDE, constants.Direction.DOWN, "resources/red.png", lambda: (0,0))
+        red = Ghost("red", constants.LANE_VERTICAL_1_LONGITUDE, constants.LANE_HORIZONTAL_2_LATTITUDE, constants.Direction.DOWN, "resources/images/red.png", lambda: (0,0))
         self.assertTrue(red._on_intersection())
         self.assertEqual(constants.Direction.DOWN, red.desired_direction)
         red._choose_direction(red.choose_destination())
