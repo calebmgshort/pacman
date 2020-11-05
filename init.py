@@ -3,7 +3,6 @@ from constants import *
 import public_vars
 from objects import *
 import time
-from ghost_algorithms import *
 
 def generate_walls():
     walls = []

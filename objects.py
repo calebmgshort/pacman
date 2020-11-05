@@ -204,7 +204,7 @@ class Ghost(Character):
                 elif self.mode == Ghost.GhostMode.SCARED:
                     destination = Ghost.destination_run_away(self)
                 elif self.mode == Ghost.GhostMode.RESPAWN:
-                    destination = Ghost.destination_respawn(self)
+                    destination = Ghost.destination_respawn()
                 else:
                     raise ValueError("Ghost mode is not valid")
                 self._choose_direction(destination)
@@ -275,7 +275,7 @@ class Ghost(Character):
         return (public_vars.pacman.x - 2*x_dif, public_vars.pacman.y - y_dif)
     
     @staticmethod
-    def destination_respawn(myself: 'Ghost'):
+    def destination_respawn():
         return (constants.LANE_VERTICAL_5_5_LONGITUDE, constants.LANE_HORIZONTAL_5_LATTITUDE)
     
     # Red hunts. Goes straight for pacman

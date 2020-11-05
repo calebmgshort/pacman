@@ -4,7 +4,6 @@ import public_vars
 from objects import *
 import init
 import time
-from ghost_algorithms import *
 import threading 
 
 # Initialize pygame
@@ -90,14 +89,14 @@ def game_over_mode():
 
 def pause_mode():
     pause_button = pygame.Rect(0, 0, 300, 150)
-    pause_button.center = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2) 
+    pause_button.center = (constants.SCREEN_WIDTH/2, constants.SCREEN_HEIGHT/2) 
     font = pygame.font.SysFont('freesansbold.ttf', 30)
     text_surface = font.render('Game Paused', False, constants.WHITE)
     text_rect = text_surface.get_rect(center=pause_button.center)
     subfont = pygame.font.SysFont('freesansbold.ttf', 15)
     subtext_surface = subfont.render("press spacebar or 'p' to resume", False, constants.WHITE)
     subtext_rect = text_surface.get_rect(center=(pause_button.center[0], pause_button.center[1]+30))
-    pygame.draw.rect(public_vars.screen, DARK_GRAY, pause_button)
+    pygame.draw.rect(public_vars.screen, constants.DARK_GRAY, pause_button)
     public_vars.screen.blit(text_surface, text_rect) 
     public_vars.screen.blit(subtext_surface, subtext_rect) 
     pygame.display.update()
