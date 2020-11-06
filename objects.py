@@ -324,19 +324,32 @@ def draw_pacman_mouth(center_x: float, center_y: float, max_angle: float, direct
     angle = int(angle)
     extra = angle % 5
     angle -= extra
+    
     # round to nearest 5
     # I have angle, adjacent
     # tan(angle) = opposite / adjacent
-    adjacent = constants.LANE_SIZE//2
-    opposite = math.tan(angle/2) * adjacent
+
+    # adjacent = constants.LANE_SIZE//2
+    # opposite = math.tan(angle/2) * adjacent
+    hypotenuse = constants.LANE_SIZE/2
+    adjacent = abs(math.cos(angle/2)) * hypotenuse
+    opposite = abs(math.sin(angle/2)) * hypotenuse
+
+    rec_width = hypotenuse - adjacent + 1
+    rec_length = constants.LANE_SIZE
+
     if direction == constants.Direction.RIGHT:
         pygame.draw.polygon(public_vars.screen, constants.BLACK, [(center_x, center_y), (center_x+adjacent, center_y + opposite), (center_x+adjacent, center_y-opposite)])
+        pygame.draw.rect(public_vars.screen, constants.BLACK, pygame.Rect(center_x + adjacent, center_y - opposite, rec_width, rec_length))
     elif direction == constants.Direction.LEFT:
         pygame.draw.polygon(public_vars.screen, constants.BLACK, [(center_x, center_y), (center_x-adjacent, center_y + opposite), (center_x-adjacent, center_y-opposite)])
+        pygame.draw.rect(public_vars.screen, constants.BLACK, pygame.Rect(center_x - hypotenuse, center_y - hypotenuse, rec_width, rec_length))
     elif direction == constants.Direction.UP:
         pygame.draw.polygon(public_vars.screen, constants.BLACK, [(center_x, center_y), (center_x-opposite, center_y-adjacent), (center_x+opposite, center_y-adjacent)])  
+        pygame.draw.rect(public_vars.screen, constants.BLACK, pygame.Rect(center_x - hypotenuse, center_y - hypotenuse, rec_length, rec_width))
     elif direction == constants.Direction.DOWN:
-        pygame.draw.polygon(public_vars.screen, constants.BLACK, [(center_x, center_y), (center_x-opposite, center_y+adjacent), (center_x+opposite, center_y+adjacent)])   
+        pygame.draw.polygon(public_vars.screen, constants.BLACK, [(center_x, center_y), (center_x-opposite, center_y+adjacent), (center_x+opposite, center_y+adjacent)])
+        pygame.draw.rect(public_vars.screen, constants.BLACK, pygame.Rect(center_x - hypotenuse, center_y + adjacent, rec_length, rec_width))   
     else:
         raise ValueError("Direction not valid")
 
