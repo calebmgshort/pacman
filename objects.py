@@ -196,21 +196,16 @@ class Ghost(Character):
     
     def move(self):
         if self._on_intersection():
-            # TODO: remove this logic, which is no longer necessary
-            # If we are on an intersection twice in a row, we should only choose the destination and direction once
-            if not self.previously_on_intersection:
-                if self.mode == Ghost.GhostMode.NORMAL:
-                    destination = self.choose_destination()
-                elif self.mode == Ghost.GhostMode.SCARED:
-                    destination = Ghost.destination_run_away(self)
-                elif self.mode == Ghost.GhostMode.RESPAWN:
-                    destination = Ghost.destination_respawn()
-                else:
-                    raise ValueError("Ghost mode is not valid")
-                self._choose_direction(destination)
-            self.previously_on_intersection = True
+            if self.mode == Ghost.GhostMode.NORMAL:
+                destination = self.choose_destination()
+            elif self.mode == Ghost.GhostMode.SCARED:
+                destination = Ghost.destination_run_away(self)
+            elif self.mode == Ghost.GhostMode.RESPAWN:
+                destination = Ghost.destination_respawn()
+            else:
+                raise ValueError("Ghost mode is not valid")
+            self._choose_direction(destination)
         else:
-            self.previously_on_intersection = False
             if self._dead_end():
                 if self._on_intersection():
                     raise ValueError("Wasn't expecting on_intersection to be true here")

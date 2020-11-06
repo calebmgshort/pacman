@@ -27,6 +27,24 @@ def restart_play_mode():
     init.initialize_game_data()
     public_vars.game_mode = constants.GameMode.PLAY
 
+def end_game_loop():
+    switch_to_play_mode = False
+    while True:
+        time.sleep(0.020)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
+                return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    switch_to_play_mode = True
+                if event.key == pygame.K_q:
+                    public_vars.game_mode = constants.GameMode.HOME_SCREEN
+                    return
+        if switch_to_play_mode:
+            restart_play_mode()
+            return 
+
 def win_mode():
     public_vars.screen.fill(constants.BLACK)
     title_font = pygame.font.Font('freesansbold.ttf', 40)
@@ -41,21 +59,7 @@ def win_mode():
     subtitle_rect = subtitle_surface.get_rect(center=(constants.SCREEN_WIDTH/2, constants.SCREEN_HEIGHT/3 + 80))
     public_vars.screen.blit(subtitle_surface, subtitle_rect)
     pygame.display.update()
-    while True:
-        switch_to_play_mode = False
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
-                return
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    switch_to_play_mode = True
-                if event.key == pygame.K_q:
-                    public_vars.game_mode = constants.GameMode.HOME_SCREEN
-                    return
-        if switch_to_play_mode:
-            restart_play_mode()
-            return 
+    end_game_loop()
 
 def game_over_mode():
     public_vars.screen.fill(constants.BLACK)
@@ -71,21 +75,7 @@ def game_over_mode():
     subtitle_rect = subtitle_surface.get_rect(center=(constants.SCREEN_WIDTH/2, constants.SCREEN_HEIGHT/3 + 80))
     public_vars.screen.blit(subtitle_surface, subtitle_rect)
     pygame.display.update()
-    while True:
-        switch_to_play_mode = False
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
-                return
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    switch_to_play_mode = True
-                if event.key == pygame.K_q:
-                    public_vars.game_mode = constants.GameMode.HOME_SCREEN
-                    return
-        if switch_to_play_mode:
-            restart_play_mode()
-            return 
+    end_game_loop()
 
 def pause_mode():
     pause_button = pygame.Rect(0, 0, 300, 150)
@@ -93,14 +83,18 @@ def pause_mode():
     font = pygame.font.SysFont('freesansbold.ttf', 30)
     text_surface = font.render('Game Paused', False, constants.WHITE)
     text_rect = text_surface.get_rect(center=pause_button.center)
-    subfont = pygame.font.SysFont('freesansbold.ttf', 15)
+    subfont = pygame.font.SysFont('freesansbold.ttf', 20)
     subtext_surface = subfont.render("press spacebar or 'p' to resume", False, constants.WHITE)
     subtext_rect = text_surface.get_rect(center=(pause_button.center[0], pause_button.center[1]+30))
+    subtext_surface2 = subfont.render("or 'q' to return to the homescreen", False, constants.WHITE)
+    subtext_rect2 = text_surface.get_rect(center=(pause_button.center[0], pause_button.center[1]+50))
     pygame.draw.rect(public_vars.screen, constants.DARK_GRAY, pause_button)
     public_vars.screen.blit(text_surface, text_rect) 
     public_vars.screen.blit(subtext_surface, subtext_rect) 
+    public_vars.screen.blit(subtext_surface2, subtext_rect2) 
     pygame.display.update()
     while True:
+        time.sleep(0.020)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
@@ -110,7 +104,6 @@ def pause_mode():
                     public_vars.game_mode = constants.GameMode.PLAY
                     return 
                 elif event.key == pygame.K_q:
-                    # TODO: diplay a "are you sure you want to quit" button
                     public_vars.game_mode = constants.GameMode.HOME_SCREEN
                     return  
 
@@ -130,7 +123,10 @@ class StopThread:
         self.should_stop = False
 
 def play_mode_render(stop_render: StopThread):
-    font = pygame.font.Font('freesansbold.ttf', 30)
+    score_font = pygame.font.Font('freesansbold.ttf', 30)
+    # text_surface = font.render('Game Paused', False, constants.WHITE)
+    info_font = pygame.font.Font('freesansbold.ttf', 20)
+    info_textsurface = info_font.render("Press spacebar or 'p' to pause, or 'q' to return to the homescreen", True, constants.WHITE)
     while True:
         time.sleep(0.020)
         if stop_render.should_stop:
@@ -148,8 +144,9 @@ def play_mode_render(stop_render: StopThread):
             ghost.render()
         for wall in public_vars.walls:
             wall.render()
-        textsurface = font.render('Score: {}'.format(public_vars.score), True, constants.WHITE)
-        public_vars.screen.blit(textsurface, (constants.SCREEN_WIDTH/2,0))
+        score_textsurface = score_font.render('Score: {}'.format(public_vars.score), True, constants.WHITE)
+        public_vars.screen.blit(score_textsurface, (constants.SCREEN_WIDTH/2,0))
+        public_vars.screen.blit(info_textsurface, (constants.WALL_LONGITUDE_1, constants.WALL_LATITUDE_11+constants.THIN_WALL_THICKNESS))
         pygame.display.update()
 
 def stop_thread(thread: threading.Thread, thread_stopper: StopThread):
@@ -211,7 +208,6 @@ def play_mode():
                     for sound_channel in sound_channels:
                         sound_channel.unpause()
                 elif event.key == pygame.K_q:
-                    # TODO: diplay a "are you sure you want to quit" button
                     public_vars.game_mode = constants.GameMode.HOME_SCREEN
                     stop_thread(play_mode_render_thread, stop_render)
                     return 
@@ -275,6 +271,7 @@ def home_screen_mode():
     public_vars.screen.blit(subtitle_surface, subtitle_rect)
     pygame.display.update()
     while True:
+        time.sleep(0.020)
         switch_to_play_mode = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
