@@ -13,14 +13,16 @@ class Orientation(Enum):
 
 class GameMode(Enum):
     HOME_SCREEN = 0
-    PLAY = 1
-    PAUSE = 2
-    WIN = 3
-    GAME_OVER = 4
-    CLOSE_WINDOW = 5
+    SINGLE_PLAY = 1
+    MULTI_PLAY = 2
+    PAUSE = 3
+    WIN = 4
+    GAME_OVER = 5
+    CLOSE_WINDOW = 6
 
 BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
+DARK_BLUE = (0, 0, 139)
 LIGHT_PINK = (255, 204, 229)
 WHITE = (255, 255, 255)
 YELLOW = (255, 255, 0)

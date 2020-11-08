@@ -354,22 +354,15 @@ def draw_pacman_mouth(center_x: float, center_y: float, max_angle: float, direct
         raise ValueError("Direction not valid")
 
 class Pacman(Character, Circle):
-    def __init__(self, x: float, y: float, direction: constants.Direction):
+    def __init__(self, x: float, y: float, direction: constants.Direction, color: Tuple[int, int, int], scared: bool):
         Character.__init__(self, x, y, direction)
-        Circle.__init__(self, x, y, constants.LANE_SIZE/2, constants.YELLOW)
+        self.color = color
+        self.scared = scared
     
     def render(self):
-        Circle.render(self)
+        color = self.color
+        if self.scared:
+            color = constants.DARK_BLUE
+        pygame.draw.circle(public_vars.screen, color, (self.x, self.y), constants.LANE_SIZE/2)
         draw_pacman_mouth(self.x, self.y, 30, self.direction)
-        # draw the eye
-        # eye_coordinates = (center_x, center_y)
-        # eye_radius = 2
-        # if self.direction == constants.Direction.RIGHT:
-        #     eye_coordinates = (center_x + radius//2, center_y + radius//2)
-        # elif self.direction == constants.Direction.UP:
-        #     eye_coordinates = (center_x - radius//2, center_y + radius//2)
-        # elif self.direction == constants.Direction.DOWN:
-        #     eye_coordinates = (center_x + radius//2, center_y - radius//2)
-        # elif self.direction == constants.Direction.DOWN:
         
-

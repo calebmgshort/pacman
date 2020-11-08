@@ -3,6 +3,7 @@ from constants import *
 import public_vars
 from objects import *
 import time
+import random
 
 def generate_walls():
     walls = []
@@ -109,8 +110,8 @@ def generate_points():
         add_point(points, LANE_VERTICAL_8_LONGITUDE, y)
     return points
 
-def initialize_game_data():
-    public_vars.pacman = Pacman(LANE_VERTICAL_5_5_LONGITUDE, LANE_HORIZONTAL_6_LATTITUDE, constants.Direction.LEFT)
+def initialize_single_game_data():
+    public_vars.pacman = Pacman(LANE_VERTICAL_5_5_LONGITUDE, LANE_HORIZONTAL_6_LATTITUDE, constants.Direction.LEFT, constants.YELLOW, False)
     public_vars.red_ghost = Ghost("red", LANE_VERTICAL_5_5_LONGITUDE, LANE_HORIZONTAL_4_LATTITUDE, constants.Direction.UP, "resources/images/red.png", Ghost.destination_red)
     public_vars.green_ghost = Ghost("green", LANE_VERTICAL_5_5_LONGITUDE+LANE_SIZE, LANE_HORIZONTAL_5_LATTITUDE, constants.Direction.LEFT, "resources/images/green.png", Ghost.destination_green)
     public_vars.pink_ghost = Ghost("pink", LANE_VERTICAL_5_5_LONGITUDE-LANE_SIZE, LANE_HORIZONTAL_5_LATTITUDE, constants.Direction.RIGHT, "resources/images/pink.png", Ghost.destination_pink)
@@ -132,3 +133,12 @@ def initialize_game_data():
 
     # Score 
     public_vars.score = 0
+
+def initialize_multi_game_data():
+    # Walls
+    public_vars.walls = generate_walls()
+
+    # Pacmen
+    scared = random.choice([True, False])
+    public_vars.p1_pacmen = [Pacman(LANE_VERTICAL_5_5_LONGITUDE, LANE_HORIZONTAL_8_LATTITUDE, constants.Direction.LEFT, constants.RED, scared)]
+    public_vars.p2_pacmen = [Pacman(LANE_VERTICAL_5_5_LONGITUDE, LANE_HORIZONTAL_2_LATTITUDE, constants.Direction.RIGHT, constants.GREEN, not scared)]
