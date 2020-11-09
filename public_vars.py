@@ -1,1 +1,1 @@
-# TODO: This file is only a placeholder for global variables
+# This file is only a placeholder for global variables

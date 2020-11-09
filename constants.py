@@ -18,7 +18,8 @@ class GameMode(Enum):
     PAUSE = 3
     WIN = 4
     GAME_OVER = 5
-    CLOSE_WINDOW = 6
+    MULTI_END = 6
+    CLOSE_WINDOW = 7
 
 BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)

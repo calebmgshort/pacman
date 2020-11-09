@@ -83,6 +83,22 @@ def game_over_mode():
     pygame.display.update()
     end_game_loop(constants.GameMode.SINGLE_PLAY)
 
+def multi_end_mode():
+    public_vars.screen.fill(constants.BLACK)
+    title_font = pygame.font.Font('freesansbold.ttf', 40)
+    main_text = "Player 1 wins!"
+    if len(public_vars.p1_pacmen) == 0:
+        main_text = "Player 2 wins!"
+    title_surface = title_font.render(main_text, False, constants.YELLOW)
+    title_rect = title_surface.get_rect(center=(constants.SCREEN_WIDTH/2, constants.SCREEN_HEIGHT/3))
+    public_vars.screen.blit(title_surface, title_rect)
+    subtitle_font = pygame.font.Font('freesansbold.ttf', 20)
+    subtitle_surface = subtitle_font.render('press spacebar to play again, or q to return to the homescreen', False, constants.YELLOW)
+    subtitle_rect = subtitle_surface.get_rect(center=(constants.SCREEN_WIDTH/2, constants.SCREEN_HEIGHT/3 + 40))
+    public_vars.screen.blit(subtitle_surface, subtitle_rect)
+    pygame.display.update()
+    end_game_loop(constants.GameMode.MULTI_PLAY)
+
 def pause_mode(play_mode: constants.GameMode):
     pause_button = pygame.Rect(0, 0, 300, 150)
     pause_button.center = (constants.SCREEN_WIDTH/2, constants.SCREEN_HEIGHT/2) 
@@ -142,11 +158,11 @@ def play_mode_render(stop_render: StopThread):
 
         if public_vars.game_mode == constants.GameMode.MULTI_PLAY:
             for pacman in public_vars.p1_pacmen:
-                pacman.render()
+                pacman.render(public_vars.p1_scared)
             for pacman in public_vars.p2_pacmen:
-                pacman.render()
+                pacman.render(not public_vars.p1_scared)
         if public_vars.game_mode == constants.GameMode.SINGLE_PLAY:
-            public_vars.pacman.render()
+            public_vars.pacman.render(None)
             for point in public_vars.points:
                 point.render()
             if should_super_points_blink():
@@ -249,11 +265,24 @@ def play_mode(play_mode: constants.GameMode):
                     if event.key == pygame.K_s:
                         for pacman in public_vars.p2_pacmen:
                             pacman.desired_direction = constants.Direction.DOWN
+        
         if play_mode == constants.GameMode.MULTI_PLAY:
             for pacman in public_vars.p1_pacmen:
                 pacman.move()
             for pacman in public_vars.p2_pacmen:
                 pacman.move()
+            for p1_pacman in public_vars.p1_pacmen[:]:
+                for p2_pacman in public_vars.p2_pacmen[:]:
+                    if p1_pacman.collides(p2_pacman):
+                        if public_vars.p1_scared:
+                            public_vars.p1_pacmen.remove(p1_pacman)
+                        else:
+                            public_vars.p2_pacmen.remove(p2_pacman)
+            if len(public_vars.p1_pacmen) == 0 or len(public_vars.p2_pacmen) == 0:
+                stop_thread(play_mode_render_thread, stop_render)
+                public_vars.game_mode = constants.GameMode.MULTI_END
+                return
+
         if play_mode == constants.GameMode.SINGLE_PLAY:
             public_vars.pacman.move()
             for point in public_vars.points:
@@ -350,6 +379,8 @@ while True:
         play_mode(constants.GameMode.SINGLE_PLAY)
     elif public_vars.game_mode == constants.GameMode.MULTI_PLAY:
         play_mode(constants.GameMode.MULTI_PLAY)
+    elif public_vars.game_mode == constants.GameMode.MULTI_END:
+        multi_end_mode()
     elif public_vars.game_mode == constants.GameMode.WIN:
         win_mode()
     elif public_vars.game_mode == constants.GameMode.GAME_OVER:
