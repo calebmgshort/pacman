@@ -35,8 +35,12 @@ class TestValidCharacterLocations(unittest.TestCase):
         self.assertTrue(ValidCharacterLocations.on_intersection((LANE_VERTICAL_3_LONGITUDE, LANE_HORIZONTAL_2_LATTITUDE)))
 
         # Extra tests
-        # TODO: Debug why this one is failing
         self.assertTrue(ValidCharacterLocations.on_intersection((LANE_VERTICAL_1_LONGITUDE, LANE_HORIZONTAL_2_LATTITUDE)))
+
+    def test_random_valid_coordinates(self):
+        for i in range(0, 10):
+            self.assertTrue(ValidCharacterLocations.valid_coordinates(ValidCharacterLocations.random_valid_coordinates()))
+
 
 if __name__ == '__main__':
     unittest.main()

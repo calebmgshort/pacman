@@ -4,6 +4,8 @@ import public_vars
 from objects import *
 import time
 import random
+from valid_character_locations import ValidCharacterLocations
+from typing import List
 
 def generate_walls():
     walls = []
@@ -134,6 +136,32 @@ def initialize_single_game_data():
     # Score 
     public_vars.score = 0
 
+def new_valid_fruit_location(objects: List[Collidable]) -> Tuple[float, float]:
+    while True:
+        coordinates = ValidCharacterLocations.random_valid_coordinates()
+        obj = Collidable(coordinates[0], coordinates[1], constants.LANE_SIZE/2)
+        collides = False
+        for item in objects:
+            if obj.collides(item):
+                collides = True
+        if not collides:
+            return coordinates
+
+def generate_fruit() -> List[Fruit]:
+    current_objects = public_vars.p1_pacmen.copy()
+    current_objects.extend(public_vars.p2_pacmen)
+    fruit_location = new_valid_fruit_location(current_objects)
+    strawberry = Fruit.fruit_factory(fruit_location[0], fruit_location[1], constants.SupportedFruit.STRAWBERRY)
+    current_objects.append(strawberry)
+    fruit_location = new_valid_fruit_location(current_objects)
+    cherry = Fruit.fruit_factory(fruit_location[0], fruit_location[1], constants.SupportedFruit.CHERRY)
+    current_objects.append(cherry)
+    fruit_location = new_valid_fruit_location(current_objects)
+    orange = Fruit.fruit_factory(fruit_location[0], fruit_location[1], constants.SupportedFruit.ORANGE)
+    current_objects.append(orange)
+    return [strawberry, cherry, orange]
+
+
 def initialize_multi_game_data():
     # Walls
     public_vars.walls = generate_walls()
@@ -142,3 +170,6 @@ def initialize_multi_game_data():
     public_vars.p1_scared = random.choice([True, False])
     public_vars.p1_pacmen = [Pacman(LANE_VERTICAL_5_5_LONGITUDE, LANE_HORIZONTAL_2_LATTITUDE, constants.Direction.LEFT, constants.RED, True)]
     public_vars.p2_pacmen = [Pacman(LANE_VERTICAL_5_5_LONGITUDE, LANE_HORIZONTAL_8_LATTITUDE, constants.Direction.RIGHT, constants.GREEN, True)]
+    
+    # Fruit
+    public_vars.fruit = generate_fruit()

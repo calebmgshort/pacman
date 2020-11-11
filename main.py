@@ -161,6 +161,8 @@ def play_mode_render(stop_render: StopThread):
                 pacman.render(public_vars.p1_scared)
             for pacman in public_vars.p2_pacmen:
                 pacman.render(not public_vars.p1_scared)
+            for fruit in public_vars.fruit:
+                fruit.render()
         if public_vars.game_mode == constants.GameMode.SINGLE_PLAY:
             public_vars.pacman.render(None)
             for point in public_vars.points:

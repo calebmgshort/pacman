@@ -21,6 +21,11 @@ class GameMode(Enum):
     MULTI_END = 6
     CLOSE_WINDOW = 7
 
+class SupportedFruit(Enum):
+    STRAWBERRY = 0
+    CHERRY = 1
+    ORANGE = 2
+
 BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 DARK_BLUE = (0, 0, 139)

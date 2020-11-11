@@ -1,5 +1,6 @@
 from constants import *
 from typing import List, Tuple
+import random
 
 class ValidCharacterLocations():
     __valid_horizontal_locs = dict()
@@ -53,3 +54,23 @@ class ValidCharacterLocations():
             if ValidCharacterLocations.valid_coordinates(a_coordinates):
                 num_valid_directions += 1
         return num_valid_directions >= 3
+    
+    @staticmethod
+    def random_valid_coordinates() -> Tuple[float, float]:
+        axis = random.randint(0, 20)
+        axiss = list(ValidCharacterLocations.__valid_horizontal_locs.keys())
+        axiss.extend(list(ValidCharacterLocations.__valid_vertical_locs.keys()))
+        axis_val = axiss[axis]
+        coordinates = None
+        hor_axis = axis < 10
+        if hor_axis:
+            range_coordinates = random.choice(ValidCharacterLocations.__valid_horizontal_locs[axis_val])
+            x_val = random.randrange(range_coordinates[0], range_coordinates[1], 1)
+            coordinates = (x_val, axis_val)
+        else:
+            range_coordinates = random.choice(ValidCharacterLocations.__valid_vertical_locs[axis_val])
+            y_val = random.randrange(range_coordinates[0], range_coordinates[1], 1)
+            coordinates = (axis_val, y_val)
+        return coordinates
+        # TODO: test
+

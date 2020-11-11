@@ -66,6 +66,8 @@ class Wall(Overlappable):
 
 class Collidable():
     def __init__(self, x: float, y: float, radius: float):
+        if not ValidCharacterLocations.valid_coordinates((x,y)):
+            raise ValueError("The coordinates for this collidable object are invalid")
         self.x = x
         self.y = y
         self.radius = radius
@@ -77,6 +79,27 @@ class Collidable():
     def overlaps_something(self, other: Overlappable) -> bool:
         return self.overlappable.overlapping(other)
 
+class Fruit(Collidable):
+    @staticmethod
+    def fruit_factory(x: float, y: float, fruit_type: constants.SupportedFruit):
+        if fruit_type == constants.SupportedFruit.STRAWBERRY:
+            image_path = "resources/images/strawberry.png"
+        elif fruit_type == constants.SupportedFruit.CHERRY:
+            image_path = "resources/images/cherry.png"
+        elif fruit_type == constants.SupportedFruit.ORANGE:
+            image_path = "resources/images/orange_fruit.png"
+        else:
+            raise ValueError("The provided fruit type is not supported")
+        return Fruit(x, y, fruit_type, image_path)
+
+    def __init__(self, x: float, y: float, fruit_type: constants.SupportedFruit, image_path: str):
+        super().__init__(x, y, constants.LANE_SIZE/2)
+        self.fruit_type = fruit_type
+        self.image = pygame.transform.scale(pygame.image.load(image_path), (round(constants.LANE_SIZE), round(constants.LANE_SIZE)))
+
+    def render(self):
+        public_vars.screen.blit(self.image, (self.x-constants.LANE_SIZE/2, self.y-constants.LANE_SIZE/2))
+        
 
 class Circle(Collidable):
     def __init__(self, x: float, y: float, radius: float, color: Tuple[int, int, int]):
