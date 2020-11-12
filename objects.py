@@ -66,8 +66,6 @@ class Wall(Overlappable):
 
 class Collidable():
     def __init__(self, x: float, y: float, radius: float):
-        if not ValidCharacterLocations.valid_coordinates((x,y)):
-            raise ValueError("The coordinates for this collidable object are invalid")
         self.x = x
         self.y = y
         self.radius = radius
@@ -93,6 +91,8 @@ class Fruit(Collidable):
         return Fruit(x, y, fruit_type, image_path)
 
     def __init__(self, x: float, y: float, fruit_type: constants.SupportedFruit, image_path: str):
+        if not ValidCharacterLocations.valid_coordinates((x,y)):
+            raise ValueError("The coordinates for this Fruit object are invalid")
         super().__init__(x, y, constants.LANE_SIZE/2)
         self.fruit_type = fruit_type
         self.image = pygame.transform.scale(pygame.image.load(image_path), (round(constants.LANE_SIZE), round(constants.LANE_SIZE)))
@@ -219,10 +219,28 @@ class Ghost(Character):
     
     def move(self):
         if self._on_intersection():
+            pacman = None
+            if public_vars.game_mode == constants.GameMode.SINGLE_PLAY:
+                pacman = public_vars.pacman
+            elif public_vars.game_mode == constants.GameMode.MULTI_PLAY:
+                # If we're pursuing, we should always pursue the scared pacman!
+                if self.mode != Ghost.GhostMode.SCARED:
+                    if public_vars.p1_scared:
+                        pacman = public_vars.p1_pacmen[0]
+                    else:
+                        pacman = public_vars.p2_pacmen[0]
+                # If we're scared, we should always run away from the pursuing pacman!
+                else:
+                    if public_vars.p1_scared:
+                        pacman = public_vars.p2_pacmen[0]
+                    else:
+                        pacman = public_vars.p1_pacmen[0]
+            else:
+                raise ValueError("ghost move: the game mode is not a play mode")
             if self.mode == Ghost.GhostMode.NORMAL:
-                destination = self.choose_destination()
+                destination = self.choose_destination(pacman)
             elif self.mode == Ghost.GhostMode.SCARED:
-                destination = Ghost.destination_run_away(self)
+                destination = Ghost.destination_run_away(pacman, self)
             elif self.mode == Ghost.GhostMode.RESPAWN:
                 destination = Ghost.destination_respawn()
             else:
@@ -286,52 +304,51 @@ class Ghost(Character):
         return (self.x > constants.WALL_LONGITUDE_4 and self.x < constants.WALL_LONGITUDE_6) and (
             self.y > constants.WALL_LATITUDE_5_INSIDE and self.y < constants.WALL_LATITUDE_6_INSIDE)
 
+    # When running away, just move in the opposite direction of pacman
     @staticmethod
-    def destination_run_away(myself: 'Ghost'):
-        x_dif = public_vars.pacman.x - myself.x
-        y_dif = public_vars.pacman.y - myself.y
-        return (public_vars.pacman.x - 2*x_dif, public_vars.pacman.y - y_dif)
+    def destination_run_away(pacman: 'Pacman', myself: 'Ghost'):
+        x_dif = pacman.x - myself.x
+        y_dif = pacman.y - myself.y
+        return (pacman.x - 2*x_dif, pacman.y - y_dif)
     
+    # When respawning, head for the center
     @staticmethod
     def destination_respawn():
         return (constants.LANE_VERTICAL_5_5_LONGITUDE, constants.LANE_HORIZONTAL_5_LATTITUDE)
     
     # Red hunts. Goes straight for pacman
     @staticmethod
-    def destination_red():
-        return (public_vars.pacman.x, public_vars.pacman.y)
+    def destination_red(pacman: 'Pacman'):
+        return (pacman.x, pacman.y)
 
     # Pink ambushes. Goes 4 lanes in head of pacman
     @staticmethod
-    def destination_pink():
-        if public_vars.pacman.direction == constants.Direction.RIGHT:
-            return (public_vars.pacman.x + 4 * constants.LANE_SIZE, public_vars.pacman.y)
-        elif public_vars.pacman.direction == constants.Direction.LEFT:
-            return (public_vars.pacman.x - 4 * constants.LANE_SIZE, public_vars.pacman.y)
-        elif public_vars.pacman.direction == constants.Direction.UP:
-            return (public_vars.pacman.x, public_vars.pacman.y - 4*constants.LANE_SIZE)
-        elif public_vars.pacman.direction == constants.Direction.DOWN:
-            return (public_vars.pacman.x, public_vars.pacman.y + 4*constants.LANE_SIZE)
+    def destination_pink(pacman: 'Pacman'):
+        if pacman.direction == constants.Direction.RIGHT:
+            return (pacman.x + 4 * constants.LANE_SIZE, pacman.y)
+        elif pacman.direction == constants.Direction.LEFT:
+            return (pacman.x - 4 * constants.LANE_SIZE, pacman.y)
+        elif pacman.direction == constants.Direction.UP:
+            return (pacman.x, pacman.y - 4*constants.LANE_SIZE)
+        elif pacman.direction == constants.Direction.DOWN:
+            return (pacman.x, pacman.y + 4*constants.LANE_SIZE)
         else:
             raise ValueError("The direction provided is not valid")
         raise ValueError("This statement should never be reached! And the direction provided is not valid")
 
     # Green goes to the point accross pacman from red
     @staticmethod
-    def destination_green():
-        x_dif = public_vars.pacman.x - public_vars.red_ghost.x
-        y_dif = public_vars.pacman.y - public_vars.red_ghost.y
-        return (public_vars.pacman.x + x_dif, public_vars.pacman.y + y_dif)
+    def destination_green(pacman: 'Pacman'):
+        x_dif = pacman.x - public_vars.red_ghost.x
+        y_dif = pacman.y - public_vars.red_ghost.y
+        return (pacman.x + x_dif, pacman.y + y_dif)
 
     # Orange hunts like red, unless it's too close, in which case it picks a random spot. 
     @staticmethod
-    def destination_orange():
-        if util.distance((public_vars.orange_ghost.x, public_vars.orange_ghost.y), (public_vars.pacman.x, public_vars.pacman.y)) > 4 * constants.LANE_SIZE * math.sqrt(2):
-            return Ghost.destination_red()
+    def destination_orange(pacman: 'Pacman'):
+        if util.distance((public_vars.orange_ghost.x, public_vars.orange_ghost.y), (pacman.x, pacman.y)) > 4 * constants.LANE_SIZE * math.sqrt(2):
+            return Ghost.destination_red(pacman)
         return (random() * constants.SCREEN_WIDTH, random() * constants.SCREEN_HEIGHT)
-
-
-
 
 def draw_pacman_mouth(center_x: float, center_y: float, max_angle: float, direction: constants.Direction):
     # Calculate current angle.
@@ -377,6 +394,10 @@ def draw_pacman_mouth(center_x: float, center_y: float, max_angle: float, direct
         raise ValueError("Direction not valid")
 
 class Pacman(Character, Circle):
+
+    def duplicate_opposite(self) -> 'Pacman':
+        return Pacman(self.x, self.y, util.opposite_direction(self.direction), self.color, self.multiplayer)
+
     def __init__(self, x: float, y: float, direction: constants.Direction, color: Tuple[int, int, int], multiplayer: bool):
         Character.__init__(self, x, y, direction)
         self.color = color

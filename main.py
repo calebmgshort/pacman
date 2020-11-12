@@ -157,12 +157,16 @@ def play_mode_render(stop_render: StopThread):
         public_vars.screen.fill(constants.BLACK)
 
         if public_vars.game_mode == constants.GameMode.MULTI_PLAY:
+            for fruit in public_vars.fruit:
+                fruit.render()
+            for ghost in public_vars.p1_ghosts:
+                ghost.render()
+            for ghost in public_vars.p2_ghosts:
+                ghost.render()
             for pacman in public_vars.p1_pacmen:
                 pacman.render(public_vars.p1_scared)
             for pacman in public_vars.p2_pacmen:
                 pacman.render(not public_vars.p1_scared)
-            for fruit in public_vars.fruit:
-                fruit.render()
         if public_vars.game_mode == constants.GameMode.SINGLE_PLAY:
             public_vars.pacman.render(None)
             for point in public_vars.points:
@@ -183,6 +187,49 @@ def play_mode_render(stop_render: StopThread):
 def stop_thread(thread: threading.Thread, thread_stopper: StopThread):
     thread_stopper.should_stop = True
     thread.join()
+
+def handle_fruit_collision(fruit_type: constants.SupportedFruit, pacman: Pacman, is_this_pacman_p1: bool):
+    if fruit_type == constants.SupportedFruit.STRAWBERRY:
+        # Make this pacman the hunter
+        if is_this_pacman_p1 == public_vars.p1_scared == True:
+            public_vars.p1_scared = False
+            for ghost in public_vars.p1_ghosts:
+                ghost.mode = Ghost.GhostMode.NORMAL
+            for ghost in public_vars.p2_ghosts:
+                ghost.mode = Ghost.GhostMode.SCARED
+        elif public_vars.p1_scared == is_this_pacman_p1 == False:
+            public_vars.p1_scared = True
+            for ghost in public_vars.p1_ghosts:
+                ghost.mode = Ghost.GhostMode.SCARED
+            for ghost in public_vars.p2_ghosts:
+                ghost.mode = Ghost.GhostMode.NORMAL
+    elif fruit_type == constants.SupportedFruit.CHERRY:
+        # Duplicate this pacman
+        new_pacman = pacman.duplicate_opposite()
+        if is_this_pacman_p1:
+            public_vars.p1_pacmen.append(new_pacman)
+        else:
+            public_vars.p2_pacmen.append(new_pacman)
+    elif fruit_type == constants.SupportedFruit.ORANGE:
+        # Add a ghost that works for this pacman
+        ghost_algorithm = Ghost.destination_pink
+        if is_this_pacman_p1 and len(public_vars.p1_ghosts) > 1 or (
+            not is_this_pacman_p1 and len(public_vars.p2_ghosts) > 1):
+            ghost_algorithm = Ghost.destination_red
+        image_path = "resources/images/green.png"
+        if is_this_pacman_p1:
+            image_path = "resources/images/red.png"
+        ghost = Ghost("ghost", pacman.x, pacman.y, pacman.direction, image_path, ghost_algorithm)
+        if (is_this_pacman_p1 and public_vars.p1_scared) or (not is_this_pacman_p1 and not public_vars.p1_scared):
+            ghost.mode = Ghost.GhostMode.SCARED
+        if is_this_pacman_p1: 
+            public_vars.p1_ghosts.append(ghost)
+        else:
+            public_vars.p2_ghosts.append(ghost)
+
+    else:
+        raise ValueError("handle_fruit_collision: The fruit type provided is invalid")
+    public_vars.fruit = init.generate_fruit()
 
 def play_mode(play_mode: constants.GameMode):
     stop_render = StopThread()
@@ -209,7 +256,7 @@ def play_mode(play_mode: constants.GameMode):
     # Start loop
     while True:
         # Sleep so everything doesn't happen too fast
-        time.sleep(0.0005)
+        time.sleep(0.0004)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
@@ -269,10 +316,16 @@ def play_mode(play_mode: constants.GameMode):
                             pacman.desired_direction = constants.Direction.DOWN
         
         if play_mode == constants.GameMode.MULTI_PLAY:
+            # Sleep so everything doesn't happen too fast
+            time.sleep(0.0002)
             for pacman in public_vars.p1_pacmen:
                 pacman.move()
             for pacman in public_vars.p2_pacmen:
                 pacman.move()
+            for ghost in public_vars.p1_ghosts:
+                ghost.move()
+            for ghost in public_vars.p2_ghosts:
+                ghost.move()
             for p1_pacman in public_vars.p1_pacmen[:]:
                 for p2_pacman in public_vars.p2_pacmen[:]:
                     if p1_pacman.collides(p2_pacman):
@@ -280,6 +333,35 @@ def play_mode(play_mode: constants.GameMode):
                             public_vars.p1_pacmen.remove(p1_pacman)
                         else:
                             public_vars.p2_pacmen.remove(p2_pacman)
+            for ghost in public_vars.p1_ghosts:
+                for p2_pacman in public_vars.p2_pacmen[:]:
+                    if ghost.collides(p2_pacman):
+                        if public_vars.p1_scared:
+                            public_vars.p1_ghosts.remove(ghost)
+                        else:
+                            public_vars.p2_pacmen.remove(p2_pacman)
+                for p2_ghost in public_vars.p2_ghosts:
+                    if ghost.collides(p2_ghost):
+                        if public_vars.p1_scared:
+                            public_vars.p1_ghosts.remove(ghost)
+                        else:
+                            public_vars.p2_ghosts.remove(p2_ghost)
+            for ghost in public_vars.p2_ghosts:
+                for p1_pacman in public_vars.p1_pacmen[:]:
+                    if ghost.collides(p1_pacman):
+                        if public_vars.p1_scared:
+                            public_vars.p1_pacmen.remove(p1_pacman)
+                        else:
+                            public_vars.p2_ghosts.remove(ghost)
+            for fruit in public_vars.fruit:
+                for p1_pacman in public_vars.p1_pacmen:
+                    if p1_pacman.collides(fruit):
+                        handle_fruit_collision(fruit.fruit_type, p1_pacman, True)
+                        break
+                for p2_pacman in public_vars.p2_pacmen:
+                    if p2_pacman.collides(fruit):
+                        handle_fruit_collision(fruit.fruit_type, p2_pacman, False)
+                        break
             if len(public_vars.p1_pacmen) == 0 or len(public_vars.p2_pacmen) == 0:
                 stop_thread(play_mode_render_thread, stop_render)
                 public_vars.game_mode = constants.GameMode.MULTI_END

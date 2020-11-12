@@ -171,5 +171,9 @@ def initialize_multi_game_data():
     public_vars.p1_pacmen = [Pacman(LANE_VERTICAL_5_5_LONGITUDE, LANE_HORIZONTAL_2_LATTITUDE, constants.Direction.LEFT, constants.RED, True)]
     public_vars.p2_pacmen = [Pacman(LANE_VERTICAL_5_5_LONGITUDE, LANE_HORIZONTAL_8_LATTITUDE, constants.Direction.RIGHT, constants.GREEN, True)]
     
+    # Ghosts
+    public_vars.p1_ghosts = []
+    public_vars.p2_ghosts = []
+
     # Fruit
     public_vars.fruit = generate_fruit()
