@@ -401,8 +401,10 @@ def play_mode(play_mode: constants.GameMode):
                 if(public_vars.pacman.collides(super_point)):
                     public_vars.score += 40
                     public_vars.super_points.remove(super_point)
+                    make_chomp_sound(chomp_sound_channel, chomp_sound)  
                     for ghost in public_vars.ghosts:
-                        ghost.mode = Ghost.GhostMode.SCARED
+                        if ghost.mode != Ghost.GhostMode.RESPAWN:
+                            ghost.mode = Ghost.GhostMode.SCARED
                     total_pause_mode_time = 0
                     start_scared_mode_time = time.time()
             for ghost in public_vars.ghosts:
