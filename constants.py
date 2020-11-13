@@ -36,6 +36,7 @@ LIGHT_GRAY = (170, 170, 170)
 DARK_GRAY = (100, 100, 100)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
+DODGERBLUE = (30,144,255)
 
 # Default settings
 CHARACTER_SPEED = 0.2

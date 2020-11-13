@@ -188,6 +188,21 @@ def stop_thread(thread: threading.Thread, thread_stopper: StopThread):
     thread_stopper.should_stop = True
     thread.join()
 
+def make_chomp_sound(chomp_sound_channel, chomp_sound):
+    if chomp_sound_channel.get_busy():
+        chomp_sound_channel.queue(chomp_sound)
+    else:
+        chomp_sound_channel.play(chomp_sound)  
+
+def make_death_sound(mixer):
+    death_sound = mixer.Sound('resources/sounds/pacman_death.wav')
+    death_sound_channel = death_sound.play()
+    while(death_sound_channel.get_busy()):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
+                return
+
 def handle_fruit_collision(fruit_type: constants.SupportedFruit, pacman: Pacman, is_this_pacman_p1: bool):
     if fruit_type == constants.SupportedFruit.STRAWBERRY:
         # Make this pacman the hunter
@@ -333,37 +348,45 @@ def play_mode(play_mode: constants.GameMode):
                             public_vars.p1_pacmen.remove(p1_pacman)
                         else:
                             public_vars.p2_pacmen.remove(p2_pacman)
-            for ghost in public_vars.p1_ghosts:
+                        make_chomp_sound(chomp_sound_channel, chomp_sound)  
+            for ghost in public_vars.p1_ghosts[:]:
                 for p2_pacman in public_vars.p2_pacmen[:]:
                     if ghost.collides(p2_pacman):
                         if public_vars.p1_scared:
                             public_vars.p1_ghosts.remove(ghost)
+                            make_chomp_sound(chomp_sound_channel, chomp_sound)  
                         else:
                             public_vars.p2_pacmen.remove(p2_pacman)
-                for p2_ghost in public_vars.p2_ghosts:
+                for p2_ghost in public_vars.p2_ghosts[:]:
                     if ghost.collides(p2_ghost):
                         if public_vars.p1_scared:
                             public_vars.p1_ghosts.remove(ghost)
                         else:
                             public_vars.p2_ghosts.remove(p2_ghost)
-            for ghost in public_vars.p2_ghosts:
+            for ghost in public_vars.p2_ghosts[:]:
                 for p1_pacman in public_vars.p1_pacmen[:]:
                     if ghost.collides(p1_pacman):
                         if public_vars.p1_scared:
                             public_vars.p1_pacmen.remove(p1_pacman)
                         else:
                             public_vars.p2_ghosts.remove(ghost)
+                            make_chomp_sound(chomp_sound_channel, chomp_sound)  
             for fruit in public_vars.fruit:
                 for p1_pacman in public_vars.p1_pacmen:
                     if p1_pacman.collides(fruit):
                         handle_fruit_collision(fruit.fruit_type, p1_pacman, True)
+                        make_chomp_sound(chomp_sound_channel, chomp_sound)  
                         break
                 for p2_pacman in public_vars.p2_pacmen:
                     if p2_pacman.collides(fruit):
                         handle_fruit_collision(fruit.fruit_type, p2_pacman, False)
+                        make_chomp_sound(chomp_sound_channel, chomp_sound)  
                         break
             if len(public_vars.p1_pacmen) == 0 or len(public_vars.p2_pacmen) == 0:
                 stop_thread(play_mode_render_thread, stop_render)
+                make_death_sound(mixer)
+                if public_vars.game_mode == constants.GameMode.CLOSE_WINDOW:
+                    return
                 public_vars.game_mode = constants.GameMode.MULTI_END
                 return
 
@@ -373,10 +396,7 @@ def play_mode(play_mode: constants.GameMode):
                 if(public_vars.pacman.collides(point)):
                     public_vars.score += 10
                     public_vars.points.remove(point)
-                    if chomp_sound_channel.get_busy():
-                        chomp_sound_channel.queue(chomp_sound)
-                    else:
-                        chomp_sound_channel.play(chomp_sound)    
+                    make_chomp_sound(chomp_sound_channel, chomp_sound)  
             for super_point in public_vars.super_points:
                 if(public_vars.pacman.collides(super_point)):
                     public_vars.score += 40
@@ -399,14 +419,9 @@ def play_mode(play_mode: constants.GameMode):
                         pass
                     else:
                         stop_thread(play_mode_render_thread, stop_render)
-                        death_sound = mixer.Sound('resources/sounds/pacman_death.wav')
-                        death_sound_channel = death_sound.play()
-                        while(death_sound_channel.get_busy()):
-                            for event in pygame.event.get():
-                                if event.type == pygame.QUIT:
-                                    public_vars.game_mode = constants.GameMode.CLOSE_WINDOW
-                                    stop_thread(play_mode_render_thread, stop_render)
-                                    return
+                        make_death_sound(mixer)
+                        if public_vars.game_mode == constants.GameMode.CLOSE_WINDOW:
+                            return
                         public_vars.game_mode = constants.GameMode.GAME_OVER
                         return
                 if ghost.in_center():

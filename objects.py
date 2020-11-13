@@ -406,7 +406,7 @@ class Pacman(Character, Circle):
     def render(self, scared):
         color = self.color
         if self.multiplayer and scared:
-            color = constants.DARK_BLUE
+            color = constants.DODGERBLUE
         pygame.draw.circle(public_vars.screen, color, (self.x, self.y), constants.LANE_SIZE/2)
         draw_pacman_mouth(self.x, self.y, 30, self.direction)
         
