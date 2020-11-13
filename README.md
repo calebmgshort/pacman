@@ -1,7 +1,6 @@
 # Pacman!
 
-![gameplay]
-(https://github.com/calebmgshort/pacman/tree/master/resources/images/gameplay.png)
+![gameplay](https://github.com/calebmgshort/pacman/tree/master/resources/images/gameplay_resized.png)
 
 ## Quickstart:
 - clone this repo
