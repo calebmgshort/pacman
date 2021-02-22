@@ -1,6 +1,5 @@
 # Pacman!
-
-![gameplay image](/resources/images/gameplay_resized.png?raw=true)
+![](pacman.gif)
 
 ## Quickstart:
 - clone this repo
