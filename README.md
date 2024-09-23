@@ -2,7 +2,9 @@
 ![](pacman.gif)
 
 ## Quickstart:
+- (make sure python and pip3 are installed)
 - clone this repo
+- pip3 install pygame
 - python main.py
 
 ## What is it?
