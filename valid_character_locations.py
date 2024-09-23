@@ -65,11 +65,11 @@ class ValidCharacterLocations():
         hor_axis = axis < 10
         if hor_axis:
             range_coordinates = random.choice(ValidCharacterLocations.__valid_horizontal_locs[axis_val])
-            x_val = random.randrange(range_coordinates[0], range_coordinates[1], 1)
+            x_val = random.randrange(int(range_coordinates[0]), int(range_coordinates[1]), 1)
             coordinates = (x_val, axis_val)
         else:
             range_coordinates = random.choice(ValidCharacterLocations.__valid_vertical_locs[axis_val])
-            y_val = random.randrange(range_coordinates[0], range_coordinates[1], 1)
+            y_val = random.randrange(int(range_coordinates[0]), int(range_coordinates[1]), 1)
             coordinates = (axis_val, y_val)
         return coordinates
         # TODO: test
